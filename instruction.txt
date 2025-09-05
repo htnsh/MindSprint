@@ -1,0 +1,4 @@
+1.Download Docker
+2.run Commands in Powershell
+-->docker build -t airq-app .
+-->docker run -p 8000:8000 --env WAQI_API_TOKEN=ecf301c838a3c2dec648cea266d0cc5218a85a2e9dfb9513d49eb2224ba75f00 airq-app
