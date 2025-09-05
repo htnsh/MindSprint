@@ -1,0 +1,214 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated to exact custom color scheme specified */
+  --background: #0f172a; /* Main app background */
+  --foreground: #f1f5f9; /* Main text (text-primary) */
+  --card: #1e293b; /* Card/section background */
+  --card-foreground: #e2e8f0; /* Headings/highlights (text-highlight) */
+  --popover: #1e293b;
+  --popover-foreground: #f1f5f9;
+  --primary: #6366f1; /* Primary gradient start */
+  --primary-foreground: #f1f5f9;
+  --secondary: #3b82f6; /* Links, icons, highlights */
+  --secondary-foreground: #f1f5f9;
+  --muted: #334155; /* Subtle borders/dividers */
+  --muted-foreground: #94a3b8; /* Muted text (text-secondary) */
+  --accent: #8b5cf6; /* Primary gradient end */
+  --accent-foreground: #f1f5f9;
+  --destructive: #ef4444;
+  --destructive-foreground: #f1f5f9;
+  --border: #334155; /* Subtle borders/dividers */
+  --input: #1e293b;
+  --ring: #6366f1;
+  --chart-1: #22c55e; /* Success color */
+  --chart-2: #f97316; /* Warning color */
+  --chart-3: #ef4444; /* Error/poor air quality */
+  --chart-4: #3b82f6; /* Secondary blue */
+  --chart-5: #94a3b8; /* Muted */
+  --radius: 0.75rem;
+  --sidebar: #1e293b;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #6366f1;
+  --sidebar-primary-foreground: #f1f5f9;
+  --sidebar-accent: #8b5cf6;
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: #334155;
+  --sidebar-ring: #6366f1;
+}
+
+.light {
+  /* Light mode using lighter shades of same palette */
+  --background: #f8fafc;
+  --foreground: #1e293b;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #1e293b;
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --secondary: #3b82f6;
+  --secondary-foreground: #ffffff;
+  --muted: #e2e8f0;
+  --muted-foreground: #64748b;
+  --accent: #8b5cf6;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #f1f5f9;
+  --ring: #6366f1;
+  --chart-1: #22c55e;
+  --chart-2: #f97316;
+  --chart-3: #ef4444;
+  --chart-4: #3b82f6;
+  --chart-5: #64748b;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1e293b;
+  --sidebar-primary: #6366f1;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #1e293b;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #6366f1;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Added custom color utilities matching the specified palette */
+  --color-success: var(--chart-1);
+  --color-warning: var(--chart-2);
+  --color-text-primary: var(--foreground);
+  --color-text-secondary: var(--muted-foreground);
+  --color-text-highlight: var(--card-foreground);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    /* Updated body background to use exact specified background color */
+    @apply bg-background text-foreground min-h-screen;
+  }
+
+  /* Enhanced glassmorphism utilities with better backdrop effects */
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+  }
+
+  .glass-strong {
+    @apply bg-card/90 backdrop-blur-2xl border border-border/60 shadow-lg;
+  }
+
+  /* Updated gradient utilities to use exact primary colors */
+  .primary-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  }
+
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.15), 0 0 40px rgba(139, 92, 246, 0.1);
+  }
+
+  /* Added smooth animations for modern feel */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.8s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Custom utility classes for the specified color scheme */
+  .text-primary {
+    color: #f1f5f9;
+  }
+  .text-secondary {
+    color: #94a3b8;
+  }
+  .text-highlight {
+    color: #e2e8f0;
+  }
+  .bg-main {
+    background-color: #0f172a;
+  }
+  .bg-card-custom {
+    background-color: #1e293b;
+  }
+  .border-custom {
+    border-color: #334155;
+  }
+  .text-success {
+    color: #22c55e;
+  }
+  .text-warning {
+    color: #f97316;
+  }
+  .bg-success {
+    background-color: #22c55e;
+  }
+  .bg-warning {
+    background-color: #f97316;
+  }
+}
