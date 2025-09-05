@@ -11,5 +11,7 @@ geopy==2.3.0
 python-dotenv==1.0.0
 APScheduler==3.10.4
 gunicorn
+flask-pymongo
+pymongo[srv]
 
 

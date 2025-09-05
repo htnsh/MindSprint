@@ -1,21 +1,35 @@
-version: '3.8'
+# version: '3.8'
+# services:
+#   web:
+#     build: .
+#     ports:
+#       - "8000:8000"
+#     environment:
+#       - WAQI_API_TOKEN=${WAQI_API_TOKEN}
+#       - DATABASE_URL=postgresql://postgres:password@db:5432/airq
+#     depends_on:
+#       - db
+#   db:
+#     image: postgis/postgis:15-3.4
+#     environment:
+#       POSTGRES_DB: airq
+#       POSTGRES_PASSWORD: password
+#       POSTGRES_USER: postgres
+#     volumes:
+#       - pgdata:/var/lib/postgresql/data
+# volumes:
+#   pgdata:
+
+version: "3.9"
+
 services:
-  web:
+  backend:
     build: .
+    container_name: airq-backend
     ports:
       - "8000:8000"
     environment:
+      - FLASK_ENV=development
+      - API_KEY=dev-key
       - WAQI_API_TOKEN=${WAQI_API_TOKEN}
-      - DATABASE_URL=postgresql://postgres:password@db:5432/airq
-    depends_on:
-      - db
-  db:
-    image: postgis/postgis:15-3.4
-    environment:
-      POSTGRES_DB: airq
-      POSTGRES_PASSWORD: password
-      POSTGRES_USER: postgres
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-volumes:
-  pgdata:
+      - MONGO_URI=mongodb+srv://snehapankhi19_db_user:xR3eLexzQGuicBHq@breathebetter.h6p6fei.mongodb.net/airq?retryWrites=true&w=majority
