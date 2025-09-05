@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - WAQI_API_TOKEN=${WAQI_API_TOKEN}
+      - DATABASE_URL=postgresql://postgres:password@db:5432/airq
+    depends_on:
+      - db
+  db:
+    image: postgis/postgis:15-3.4
+    environment:
+      POSTGRES_DB: airq
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
