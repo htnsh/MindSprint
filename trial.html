@@ -128,16 +128,272 @@
         // Generate sample sensor data for demonstration
         function generateSampleSensorData() {
             const cities = [
-                { name: 'Delhi', lat: 28.6139, lon: 77.2090 },
-                { name: 'Mumbai', lat: 19.0760, lon: 72.8777 },
-                { name: 'Kolkata', lat: 22.5726, lon: 88.3639 },
-                { name: 'Chennai', lat: 13.0827, lon: 80.2707 },
-                { name: 'Bengaluru', lat: 12.9716, lon: 77.5946 },
-                { name: 'Pune', lat: 18.5204, lon: 73.8567 },
-                { name: 'Hyderabad', lat: 17.3850, lon: 78.4867 },
-                { name: 'Ahmedabad', lat: 23.0225, lon: 72.5714 },
-                { name: 'Jaipur', lat: 26.9124, lon: 75.7873 },
-                { name: 'Lucknow', lat: 26.8467, lon: 80.9462 }
+                // Andhra Pradesh
+    { name: 'Visakhapatnam', lat: 17.6868, lon: 83.2185, state: 'Andhra Pradesh' },
+    { name: 'Vijayawada', lat: 16.5062, lon: 80.6480, state: 'Andhra Pradesh' },
+    { name: 'Guntur', lat: 16.3067, lon: 80.4365, state: 'Andhra Pradesh' },
+    { name: 'Nellore', lat: 14.4426, lon: 79.9865, state: 'Andhra Pradesh' },
+    { name: 'Kurnool', lat: 15.8281, lon: 78.0373, state: 'Andhra Pradesh' },
+    { name: 'Rajahmundry', lat: 17.0005, lon: 81.8040, state: 'Andhra Pradesh' },
+    { name: 'Tirupati', lat: 13.6288, lon: 79.4192, state: 'Andhra Pradesh' },
+    { name: 'Kadapa', lat: 14.4673, lon: 78.8242, state: 'Andhra Pradesh' },
+    { name: 'Anantapur', lat: 14.6819, lon: 77.6006, state: 'Andhra Pradesh' },
+    { name: 'Eluru', lat: 16.7107, lon: 81.0948, state: 'Andhra Pradesh' },
+
+    // Arunachal Pradesh
+    { name: 'Itanagar', lat: 27.0844, lon: 93.6053, state: 'Arunachal Pradesh' },
+    { name: 'Tezpur', lat: 26.6340, lon: 92.7931, state: 'Arunachal Pradesh' },
+    { name: 'Pasighat', lat: 28.0710, lon: 95.3260, state: 'Arunachal Pradesh' },
+    { name: 'Bomdila', lat: 27.2615, lon: 92.4089, state: 'Arunachal Pradesh' },
+    { name: 'Ziro', lat: 27.5461, lon: 93.8296, state: 'Arunachal Pradesh' },
+
+    // Assam
+    { name: 'Guwahati', lat: 26.1445, lon: 91.7362, state: 'Assam' },
+    { name: 'Dibrugarh', lat: 27.4728, lon: 94.9120, state: 'Assam' },
+    { name: 'Jorhat', lat: 26.7509, lon: 94.2037, state: 'Assam' },
+    { name: 'Silchar', lat: 24.8333, lon: 92.7789, state: 'Assam' },
+    { name: 'Tezpur', lat: 26.6340, lon: 92.7931, state: 'Assam' },
+    { name: 'Nagaon', lat: 26.3477, lon: 92.6820, state: 'Assam' },
+    { name: 'Tinsukia', lat: 27.4898, lon: 95.3597, state: 'Assam' },
+    { name: 'Bongaigaon', lat: 26.4831, lon: 90.5548, state: 'Assam' },
+    { name: 'Karimganj', lat: 24.8696, lon: 92.3484, state: 'Assam' },
+
+    // Bihar
+    { name: 'Patna', lat: 25.5941, lon: 85.1376, state: 'Bihar' },
+    { name: 'Gaya', lat: 24.7955, lon: 85.0002, state: 'Bihar' },
+    { name: 'Bhagalpur', lat: 25.2425, lon: 86.9842, state: 'Bihar' },
+    { name: 'Muzaffarpur', lat: 26.1197, lon: 85.3910, state: 'Bihar' },
+    { name: 'Darbhanga', lat: 26.1542, lon: 85.8918, state: 'Bihar' },
+    { name: 'Bihar Sharif', lat: 25.1979, lon: 85.5238, state: 'Bihar' },
+    { name: 'Arrah', lat: 25.5565, lon: 84.6632, state: 'Bihar' },
+    { name: 'Begusarai', lat: 25.4182, lon: 86.1274, state: 'Bihar' },
+    { name: 'Katihar', lat: 25.5464, lon: 87.5781, state: 'Bihar' },
+    { name: 'Munger', lat: 25.3756, lon: 86.4739, state: 'Bihar' },
+    { name: 'Chhapra', lat: 25.7781, lon: 84.0172, state: 'Bihar' },
+    { name: 'Sasaram', lat: 24.9519, lon: 84.0103, state: 'Bihar' },
+
+    // Chhattisgarh
+    { name: 'Raipur', lat: 21.2514, lon: 81.6296, state: 'Chhattisgarh' },
+    { name: 'Bhilai', lat: 21.1938, lon: 81.3509, state: 'Chhattisgarh' },
+    { name: 'Bilaspur', lat: 22.0797, lon: 82.1409, state: 'Chhattisgarh' },
+    { name: 'Korba', lat: 22.3595, lon: 82.7501, state: 'Chhattisgarh' },
+    { name: 'Durg', lat: 21.1901, lon: 81.2849, state: 'Chhattisgarh' },
+    { name: 'Rajnandgaon', lat: 21.0974, lon: 81.0379, state: 'Chhattisgarh' },
+    { name: 'Jagdalpur', lat: 19.0901, lon: 82.0308, state: 'Chhattisgarh' },
+
+    // Goa
+    { name: 'Panaji', lat: 15.4989, lon: 73.8278, state: 'Goa' },
+    { name: 'Margao', lat: 15.2700, lon: 73.9520, state: 'Goa' },
+    { name: 'Vasco da Gama', lat: 15.3996, lon: 73.8315, state: 'Goa' },
+    { name: 'Mapusa', lat: 15.5951, lon: 73.8097, state: 'Goa' },
+    { name: 'Ponda', lat: 15.4013, lon: 74.0071, state: 'Goa' },
+
+    // Gujarat
+    { name: 'Ahmedabad', lat: 23.0225, lon: 72.5714, state: 'Gujarat' },
+    { name: 'Surat', lat: 21.1702, lon: 72.8311, state: 'Gujarat' },
+    { name: 'Vadodara', lat: 22.3072, lon: 73.1812, state: 'Gujarat' },
+    { name: 'Rajkot', lat: 22.3039, lon: 70.8022, state: 'Gujarat' },
+    { name: 'Bhavnagar', lat: 21.7645, lon: 72.1519, state: 'Gujarat' },
+    { name: 'Jamnagar', lat: 22.4707, lon: 70.0577, state: 'Gujarat' },
+    { name: 'Junagadh', lat: 21.5222, lon: 70.4579, state: 'Gujarat' },
+    { name: 'Gandhinagar', lat: 23.2156, lon: 72.6369, state: 'Gujarat' },
+    { name: 'Anand', lat: 22.5645, lon: 72.9289, state: 'Gujarat' },
+    { name: 'Morbi', lat: 22.8173, lon: 70.8470, state: 'Gujarat' },
+    { name: 'Mehsana', lat: 23.5880, lon: 72.3693, state: 'Gujarat' },
+    { name: 'Vapi', lat: 20.3712, lon: 72.9050, state: 'Gujarat' },
+    { name: 'Navsari', lat: 20.9463, lon: 72.9520, state: 'Gujarat' },
+
+    // Haryana
+    { name: 'Gurgaon', lat: 28.4595, lon: 77.0266, state: 'Haryana' },
+    { name: 'Faridabad', lat: 28.4089, lon: 77.3178, state: 'Haryana' },
+    { name: 'Panipat', lat: 29.3909, lon: 76.9635, state: 'Haryana' },
+    { name: 'Ambala', lat: 30.3782, lon: 76.7767, state: 'Haryana' },
+    { name: 'Yamunanagar', lat: 30.1290, lon: 77.2674, state: 'Haryana' },
+    { name: 'Rohtak', lat: 28.8955, lon: 76.6066, state: 'Haryana' },
+    { name: 'Hisar', lat: 29.1492, lon: 75.7217, state: 'Haryana' },
+    { name: 'Karnal', lat: 29.6857, lon: 76.9905, state: 'Haryana' },
+    { name: 'Sonipat', lat: 28.9931, lon: 77.0151, state: 'Haryana' },
+    { name: 'Panchkula', lat: 30.6942, lon: 76.8606, state: 'Haryana' },
+
+    // Himachal Pradesh
+    { name: 'Shimla', lat: 31.1048, lon: 77.1734, state: 'Himachal Pradesh' },
+    { name: 'Dharamshala', lat: 32.2190, lon: 76.3234, state: 'Himachal Pradesh' },
+    { name: 'Solan', lat: 30.9045, lon: 77.0967, state: 'Himachal Pradesh' },
+    { name: 'Mandi', lat: 31.7079, lon: 76.9315, state: 'Himachal Pradesh' },
+    { name: 'Palampur', lat: 32.1086, lon: 76.5348, state: 'Himachal Pradesh' },
+    { name: 'Baddi', lat: 30.9576, lon: 76.7847, state: 'Himachal Pradesh' },
+    { name: 'Nahan', lat: 30.5600, lon: 77.2944, state: 'Himachal Pradesh' },
+    { name: 'Una', lat: 31.4648, lon: 76.2708, state: 'Himachal Pradesh' },
+    { name: 'Kullu', lat: 31.9576, lon: 77.1098, state: 'Himachal Pradesh' },
+    { name: 'Hamirpur', lat: 31.6839, lon: 76.5218, state: 'Himachal Pradesh' },
+
+    // Jharkhand
+    { name: 'Ranchi', lat: 23.3441, lon: 85.3096, state: 'Jharkhand' },
+    { name: 'Jamshedpur', lat: 22.8046, lon: 86.2029, state: 'Jharkhand' },
+    { name: 'Dhanbad', lat: 23.7957, lon: 86.4304, state: 'Jharkhand' },
+    { name: 'Bokaro', lat: 23.6693, lon: 86.1511, state: 'Jharkhand' },
+    { name: 'Deoghar', lat: 24.4827, lon: 86.6998, state: 'Jharkhand' },
+    { name: 'Phusro', lat: 23.6810, lon: 86.0360, state: 'Jharkhand' },
+    { name: 'Hazaribagh', lat: 23.9901, lon: 85.3647, state: 'Jharkhand' },
+    { name: 'Giridih', lat: 24.1901, lon: 86.3009, state: 'Jharkhand' },
+
+    // Karnataka
+    { name: 'Bengaluru', lat: 12.9716, lon: 77.5946, state: 'Karnataka' },
+    { name: 'Mysore', lat: 12.2958, lon: 76.6394, state: 'Karnataka' },
+    { name: 'Hubli', lat: 15.3647, lon: 75.1240, state: 'Karnataka' },
+    { name: 'Mangalore', lat: 12.9141, lon: 74.8560, state: 'Karnataka' },
+    { name: 'Belgaum', lat: 15.8497, lon: 74.4977, state: 'Karnataka' },
+    { name: 'Gulbarga', lat: 17.3297, lon: 76.8343, state: 'Karnataka' },
+    { name: 'Davanagere', lat: 14.4644, lon: 75.9217, state: 'Karnataka' },
+    { name: 'Bellary', lat: 15.1394, lon: 76.9214, state: 'Karnataka' },
+    { name: 'Bijapur', lat: 16.8302, lon: 75.7100, state: 'Karnataka' },
+    { name: 'Shimoga', lat: 13.9299, lon: 75.5681, state: 'Karnataka' },
+    { name: 'Tumkur', lat: 13.3379, lon: 77.1022, state: 'Karnataka' },
+    { name: 'Udupi', lat: 13.3409, lon: 74.7421, state: 'Karnataka' },
+
+    // Kerala
+    { name: 'Thiruvananthapuram', lat: 8.5241, lon: 76.9366, state: 'Kerala' },
+    { name: 'Kochi', lat: 9.9312, lon: 76.2673, state: 'Kerala' },
+    { name: 'Kozhikode', lat: 11.2588, lon: 75.7804, state: 'Kerala' },
+    { name: 'Thrissur', lat: 10.5276, lon: 76.2144, state: 'Kerala' },
+    { name: 'Kannur', lat: 11.8745, lon: 75.3704, state: 'Kerala' },
+    { name: 'Kollam', lat: 8.8932, lon: 76.6141, state: 'Kerala' },
+    { name: 'Alappuzha', lat: 9.4981, lon: 76.3388, state: 'Kerala' },
+    { name: 'Kottayam', lat: 9.5916, lon: 76.5222, state: 'Kerala' },
+    { name: 'Palakkad', lat: 10.7867, lon: 76.6548, state: 'Kerala' },
+    { name: 'Malappuram', lat: 11.0410, lon: 76.0820, state: 'Kerala' },
+
+    // Madhya Pradesh
+    { name: 'Bhopal', lat: 23.2599, lon: 77.4126, state: 'Madhya Pradesh' },
+    { name: 'Indore', lat: 22.7196, lon: 75.8577, state: 'Madhya Pradesh' },
+    { name: 'Gwalior', lat: 26.2183, lon: 78.1828, state: 'Madhya Pradesh' },
+    { name: 'Jabalpur', lat: 23.1815, lon: 79.9864, state: 'Madhya Pradesh' },
+    { name: 'Ujjain', lat: 23.1793, lon: 75.7849, state: 'Madhya Pradesh' },
+    { name: 'Sagar', lat: 23.8388, lon: 78.7378, state: 'Madhya Pradesh' },
+    { name: 'Dewas', lat: 22.9676, lon: 76.0534, state: 'Madhya Pradesh' },
+    { name: 'Satna', lat: 24.5667, lon: 80.8333, state: 'Madhya Pradesh' },
+    { name: 'Ratlam', lat: 23.3315, lon: 75.0367, state: 'Madhya Pradesh' },
+    { name: 'Rewa', lat: 24.5311, lon: 81.2961, state: 'Madhya Pradesh' },
+    { name: 'Singrauli', lat: 24.1997, lon: 82.6739, state: 'Madhya Pradesh' },
+
+    // Maharashtra
+    { name: 'Mumbai', lat: 19.0760, lon: 72.8777, state: 'Maharashtra' },
+    { name: 'Pune', lat: 18.5204, lon: 73.8567, state: 'Maharashtra' },
+    { name: 'Nagpur', lat: 21.1458, lon: 79.0882, state: 'Maharashtra' },
+    { name: 'Thane', lat: 19.2183, lon: 72.9781, state: 'Maharashtra' },
+    { name: 'Nashik', lat: 19.9975, lon: 73.7898, state: 'Maharashtra' },
+    { name: 'Aurangabad', lat: 19.8762, lon: 75.3433, state: 'Maharashtra' },
+    { name: 'Solapur', lat: 17.6599, lon: 75.9064, state: 'Maharashtra' },
+    { name: 'Amravati', lat: 20.9319, lon: 77.7523, state: 'Maharashtra' },
+    { name: 'Kolhapur', lat: 16.7050, lon: 74.2433, state: 'Maharashtra' },
+    { name: 'Sangli', lat: 16.8544, lon: 74.5638, state: 'Maharashtra' },
+    { name: 'Jalgaon', lat: 21.0077, lon: 75.5626, state: 'Maharashtra' },
+    { name: 'Akola', lat: 20.7002, lon: 77.0082, state: 'Maharashtra' },
+    { name: 'Latur', lat: 18.4088, lon: 76.5604, state: 'Maharashtra' },
+    { name: 'Dhule', lat: 20.9042, lon: 74.7749, state: 'Maharashtra' },
+    { name: 'Ahmednagar', lat: 19.0948, lon: 74.7480, state: 'Maharashtra' },
+    { name: 'Chandrapur', lat: 19.9615, lon: 79.2961, state: 'Maharashtra' },
+    { name: 'Parbhani', lat: 19.2608, lon: 76.7734, state: 'Maharashtra' },
+    { name: 'Jalna', lat: 19.8347, lon: 75.8861, state: 'Maharashtra' },
+    { name: 'Bhiwandi', lat: 19.3002, lon: 73.0635, state: 'Maharashtra' },
+    { name: 'Nanded', lat: 19.1383, lon: 77.3210, state: 'Maharashtra' },
+
+    // Manipur
+    { name: 'Imphal', lat: 24.8170, lon: 93.9368, state: 'Manipur' },
+    { name: 'Thoubal', lat: 24.6370, lon: 93.9857, state: 'Manipur' },
+    { name: 'Bishnupur', lat: 24.6186, lon: 93.7717, state: 'Manipur' },
+
+    // Meghalaya
+    { name: 'Shillong', lat: 25.5788, lon: 91.8933, state: 'Meghalaya' },
+    { name: 'Tura', lat: 25.5138, lon: 90.2037, state: 'Meghalaya' },
+    { name: 'Jowai', lat: 25.4522, lon: 92.1956, state: 'Meghalaya' },
+
+    // Mizoram
+    { name: 'Aizawl', lat: 23.7271, lon: 92.7176, state: 'Mizoram' },
+    { name: 'Lunglei', lat: 22.8856, lon: 92.7340, state: 'Mizoram' },
+    { name: 'Champhai', lat: 23.4601, lon: 93.3262, state: 'Mizoram' },
+
+    // Nagaland
+    { name: 'Kohima', lat: 25.6751, lon: 94.1086, state: 'Nagaland' },
+    { name: 'Dimapur', lat: 25.9044, lon: 93.7267, state: 'Nagaland' },
+    { name: 'Mokokchung', lat: 26.3225, lon: 94.5134, state: 'Nagaland' },
+
+    // Odisha
+    { name: 'Bhubaneswar', lat: 20.2961, lon: 85.8245, state: 'Odisha' },
+    { name: 'Cuttack', lat: 20.4625, lon: 85.8828, state: 'Odisha' },
+    { name: 'Rourkela', lat: 22.2604, lon: 84.8536, state: 'Odisha' },
+    { name: 'Berhampur', lat: 19.3149, lon: 84.7941, state: 'Odisha' },
+    { name: 'Sambalpur', lat: 21.4669, lon: 83.9812, state: 'Odisha' },
+    { name: 'Puri', lat: 19.8135, lon: 85.8312, state: 'Odisha' },
+    { name: 'Balasore', lat: 21.4942, lon: 86.9017, state: 'Odisha' },
+    { name: 'Baripada', lat: 21.9347, lon: 86.7350, state: 'Odisha' },
+
+    // Punjab
+    { name: 'Ludhiana', lat: 30.9010, lon: 75.8573, state: 'Punjab' },
+    { name: 'Amritsar', lat: 31.6340, lon: 74.8723, state: 'Punjab' },
+    { name: 'Jalandhar', lat: 31.3260, lon: 75.5762, state: 'Punjab' },
+    { name: 'Patiala', lat: 30.3398, lon: 76.3869, state: 'Punjab' },
+    { name: 'Bathinda', lat: 30.2118, lon: 74.9455, state: 'Punjab' },
+    { name: 'Mohali', lat: 30.7046, lon: 76.7179, state: 'Punjab' },
+    { name: 'Firozpur', lat: 30.9324, lon: 74.6063, state: 'Punjab' },
+    { name: 'Batala', lat: 31.8226, lon: 75.2045, state: 'Punjab' },
+    { name: 'Pathankot', lat: 32.2746, lon: 75.6521, state: 'Punjab' },
+    { name: 'Moga', lat: 30.8078, lon: 75.1708, state: 'Punjab' },
+
+    // Rajasthan
+    { name: 'Jaipur', lat: 26.9124, lon: 75.7873, state: 'Rajasthan' },
+    { name: 'Jodhpur', lat: 26.2389, lon: 73.0243, state: 'Rajasthan' },
+    { name: 'Kota', lat: 25.2138, lon: 75.8648, state: 'Rajasthan' },
+    { name: 'Bikaner', lat: 28.0229, lon: 73.3119, state: 'Rajasthan' },
+    { name: 'Ajmer', lat: 26.4499, lon: 74.6399, state: 'Rajasthan' },
+    { name: 'Udaipur', lat: 24.5854, lon: 73.7125, state: 'Rajasthan' },
+    { name: 'Bhilwara', lat: 25.3407, lon: 74.6269, state: 'Rajasthan' },
+    { name: 'Alwar', lat: 27.5530, lon: 76.6346, state: 'Rajasthan' },
+    { name: 'Bharatpur', lat: 27.2172, lon: 77.4909, state: 'Rajasthan' },
+    { name: 'Sikar', lat: 27.6094, lon: 75.1399, state: 'Rajasthan' },
+    { name: 'Pali', lat: 25.7711, lon: 73.3234, state: 'Rajasthan' },
+    { name: 'Tonk', lat: 26.1669, lon: 75.7947, state: 'Rajasthan' },
+
+    // Sikkim
+    { name: 'Gangtok', lat: 27.3389, lon: 88.6065, state: 'Sikkim' },
+    { name: 'Namchi', lat: 27.1667, lon: 88.3667, state: 'Sikkim' },
+    { name: 'Geyzing', lat: 27.2833, lon: 88.2500, state: 'Sikkim' },
+
+    // Tamil Nadu
+    { name: 'Chennai', lat: 13.0827, lon: 80.2707, state: 'Tamil Nadu' },
+    { name: 'Coimbatore', lat: 11.0168, lon: 76.9558, state: 'Tamil Nadu' },
+    { name: 'Madurai', lat: 9.9252, lon: 78.1198, state: 'Tamil Nadu' },
+    { name: 'Tiruchirappalli', lat: 10.7905, lon: 78.7047, state: 'Tamil Nadu' },
+    { name: 'Salem', lat: 11.6643, lon: 78.1460, state: 'Tamil Nadu' },
+    { name: 'Tirunelveli', lat: 8.7139, lon: 77.7567, state: 'Tamil Nadu' },
+    { name: 'Tiruppur', lat: 11.1085, lon: 77.3411, state: 'Tamil Nadu' },
+    { name: 'Vellore', lat: 12.9165, lon: 79.1325, state: 'Tamil Nadu' },
+    { name: 'Erode', lat: 11.3410, lon: 77.7172, state: 'Tamil Nadu' },
+    { name: 'Thoothukkudi', lat: 8.7642, lon: 78.1348, state: 'Tamil Nadu' },
+    { name: 'Dindigul', lat: 10.3673, lon: 77.9803, state: 'Tamil Nadu' },
+    { name: 'Thanjavur', lat: 10.7870, lon: 79.1378, state: 'Tamil Nadu' },
+    { name: 'Ranipet', lat: 12.9249, lon: 79.3308, state: 'Tamil Nadu' },
+    { name: 'Sivakasi', lat: 9.4530, lon: 77.7908, state: 'Tamil Nadu' },
+    { name: 'Karur', lat: 10.9601, lon: 78.0766, state: 'Tamil Nadu' },
+
+    // Telangana
+    { name: 'Hyderabad', lat: 17.3850, lon: 78.4867, state: 'Telangana' },
+    { name: 'Warangal', lat: 17.9784, lon: 79.6000, state: 'Telangana' },
+    { name: 'Nizamabad', lat: 18.6725, lon: 78.0941, state: 'Telangana' },
+    { name: 'Karimnagar', lat: 18.4386, lon: 79.1288, state: 'Telangana' },
+    { name: 'Ramagundam', lat: 18.4554, lon: 79.4747, state: 'Telangana' },
+    { name: 'Khammam', lat: 17.2473, lon: 80.1514, state: 'Telangana' },
+    { name: 'Mahbubnagar', lat: 16.7393, lon: 77.9974, state: 'Telangana' },
+
+    // Tripura
+    { name: 'Agartala', lat: 23.8315, lon: 91.2868, state: 'Tripura' },
+    { name: 'Dharmanagar', lat: 24.3667, lon: 92.1667, state: 'Tripura' },
+    { name: 'Udaipur', lat: 23.5333, lon: 91.4833, state: 'Tripura' },
+
+    // Uttar Pradesh
+    { name: 'Lucknow', lat: 26.8467, lon: 80.9462, state: 'Uttar Pradesh' },
+    { name: 'Kanpur', lat: 26.4499, lon: 80.3319, state: 'Uttar Pradesh' },
+    { name: 'Ghaziabad', lat: 28.6692, lon: 77.4538, state: 'Uttar Pradesh' }
             ];
             
             const sensors = [];
@@ -232,7 +488,7 @@
                     `);
                 });
                 
-                updateStatus(`Loaded ${sensorData.length} sensors`);
+                updateStatus(`Loaded ${sensorData.length} sensors across ${new Set(sensorData.map(s => s.city)).size} locations`);
                 
             } catch (error) {
                 console.error("Error fetching sensor data:", error);
