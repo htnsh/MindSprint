@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>India Air Quality Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f7fb; margin:0; }
+    header { text-align:center; padding:20px; color:#2b6cb0; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap:16px; padding:20px; }
+    .card { background:#fff; border-radius:12px; box-shadow:0 4px 8px rgba(0,0,0,0.1); padding:16px; }
+    .title { font-weight:bold; margin-bottom:8px; }
+    .aqi { font-size:24px; text-align:center; margin:8px 0; }
+    .status { text-align:center; color:#666; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>India Air Quality Dashboard</h1>
+    <p>Live AQI and Pollen Forecasts</p>
+  </header>
+
+  <main class="grid" id="cardsGrid">
+    <!-- cards inserted here -->
+  </main>
+
+  <script>
+    const API_BASE = "http://localhost:8000"; // change if deployed
+
+    const cities = [
+      "Delhi","Mumbai","Bengaluru","Chennai","Kolkata","Lucknow",
+      "Jaipur","Bhopal","Hyderabad","Patna","Guwahati","Chandigarh",
+      "Ahmedabad","Thiruvananthapuram","Bhubaneswar","Shimla"
+    ];
+
+    function createCard(city, aqi, status) {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="title">${city}</div>
+        <div class="aqi">${aqi ?? "--"}</div>
+        <div class="status">${status}</div>
+      `;
+      return card;
+    }
+
+    async function loadAQI() {
+      try {
+        const res = await fetch(`${API_BASE}/api/sensors`);
+        const data = await res.json();
+        const grid = document.getElementById("cardsGrid");
+        grid.innerHTML = "";
+
+        cities.forEach(city => {
+          // find a matching sensor (rough match by location_name)
+          const sensor = data.data.find(d => d.location_name?.toLowerCase().includes(city.toLowerCase()));
+          if(sensor){
+            grid.appendChild(createCard(city, sensor.pm25, "Live AQI"));
+          } else {
+            grid.appendChild(createCard(city, "--", "Unavailable"));
+          }
+        });
+      } catch(e) {
+        console.error("Error loading AQI:", e);
+      }
+    }
+
+    loadAQI();
+  </script>
+</body>
+</html>
