@@ -59,7 +59,9 @@ export function Navigation() {
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">Welcome, {user.name}</span>
+          <span className="text-sm text-muted-foreground">
+            Welcome, {user.first_name || user.username || user.email}
+          </span>
           <Button variant="outline" size="sm" onClick={logout}>
             <LogOut className="h-4 w-4 mr-2" />
             Sign out
@@ -105,7 +107,9 @@ export function Navigation() {
             ))}
             <div className="border-t pt-4 space-y-2">
               <div className="flex items-center justify-between px-3">
-                <span className="text-sm text-muted-foreground">Welcome, {user.name}</span>
+                <span className="text-sm text-muted-foreground">
+                  Welcome, {user.first_name || user.username || user.email}
+                </span>
               </div>
               <Button variant="outline" className="w-full justify-start gap-2 bg-transparent" onClick={logout}>
                 <LogOut className="h-4 w-4" />

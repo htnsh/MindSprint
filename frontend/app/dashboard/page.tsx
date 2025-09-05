@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Wind, MapPin, Users, Bell, TrendingUp, Activity } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 import { AirQualityChart } from "@/components/air-quality-chart"
 import { AllergenTracker } from "@/components/allergen-tracker"
 import { HealthInsights } from "@/components/health-insights"
@@ -13,10 +15,21 @@ import { AIChatbot } from "@/components/ai-chatbot"
 import { Navigation } from "@/components/navigation"
 
 export default function DashboardPage() {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/')
+    }
+  }, [user, loading, router])
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
 
   if (!user) {
-    return <div>Loading...</div>
+    return null // Will redirect
   }
 
   return (
