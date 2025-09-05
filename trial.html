@@ -1,81 +1,265 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>India Air Quality & Allergen Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4184P5L1WJ5p5lC5Z2+D6S5W6C5Z2+D6S5W6C5Z2+D6S5W6C5Z2+D6S5W6"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-2sO+N8z2eNf9d0+3V8y6C5d8u3C9J3S3J2D6S5W6C5d8u3C9J3S3J2D6S5W6C5d8u3C9J3S3J2D6S5W6C5d8u3C9J3S3J2D6S5W6"
-        crossorigin=""></script>
-    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
         #map {
-            height: 90vh;
+            height: 80vh;
             width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 200px;
+        }
+        
+        .legend {
+            position: absolute;
+            bottom: 30px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 2px 0;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 15px;
+            margin-right: 5px;
+            border-radius: 2px;
         }
     </style>
 </head>
 <body>
     <h1>Hyperlocal India Air Quality Map (MVP)</h1>
     <div id="map"></div>
+    
+    <div class="info-panel">
+        <strong>Status:</strong>
+        <div id="status">Loading...</div>
+    </div>
+    
+    <div class="legend">
+        <strong>Air Quality Index</strong>
+        <div class="legend-item">
+            <div class="legend-color" style="background: green;"></div>
+            <span>Good (0-50)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: yellow;"></div>
+            <span>Moderate (51-100)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: orange;"></div>
+            <span>Unhealthy for Sensitive (101-150)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: red;"></div>
+            <span>Unhealthy (151-200)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: darkred;"></div>
+            <span>Very Unhealthy (200+)</span>
+        </div>
+    </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    
     <script>
         const API_URL = "http://localhost:8000";
-
-        // Initialize the map centered on India
-        const map = L.map('map').setView([20.5937, 78.9629], 5);
-
-        // Add a base map layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
+        let map;
+        let sensorGroup;
+        let heatmapLayer;
+        
+        // Initialize the map
+        function initializeMap() {
+            map = L.map('map').setView([20.5937, 78.9629], 5);
+            
+            // Add a base map layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            updateStatus("Map initialized");
+        }
+        
+        // Update status display
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+        
+        // Generate sample sensor data for demonstration
+        function generateSampleSensorData() {
+            const cities = [
+                { name: 'Delhi', lat: 28.6139, lon: 77.2090 },
+                { name: 'Mumbai', lat: 19.0760, lon: 72.8777 },
+                { name: 'Kolkata', lat: 22.5726, lon: 88.3639 },
+                { name: 'Chennai', lat: 13.0827, lon: 80.2707 },
+                { name: 'Bengaluru', lat: 12.9716, lon: 77.5946 },
+                { name: 'Pune', lat: 18.5204, lon: 73.8567 },
+                { name: 'Hyderabad', lat: 17.3850, lon: 78.4867 },
+                { name: 'Ahmedabad', lat: 23.0225, lon: 72.5714 },
+                { name: 'Jaipur', lat: 26.9124, lon: 75.7873 },
+                { name: 'Lucknow', lat: 26.8467, lon: 80.9462 }
+            ];
+            
+            const sensors = [];
+            cities.forEach(city => {
+                // Generate multiple sensors around each city
+                for (let i = 0; i < 5; i++) {
+                    const latOffset = (Math.random() - 0.5) * 0.2; // ±0.1 degree
+                    const lonOffset = (Math.random() - 0.5) * 0.2;
+                    const pm25 = Math.random() * 300 + 20; // 20-320 range
+                    
+                    sensors.push({
+                        lat: city.lat + latOffset,
+                        lon: city.lon + lonOffset,
+                        pm25: pm25,
+                        source: `${city.name} Sensor ${i + 1}`,
+                        city: city.name
+                    });
+                }
+            });
+            
+            return sensors;
+        }
+        
+        // Generate sample grid data for heatmap
+        function generateSampleGridData() {
+            const gridData = [];
+            const bounds = {
+                north: 30,
+                south: 8,
+                east: 97,
+                west: 68
+            };
+            
+            // Generate a grid of points across India
+            for (let lat = bounds.south; lat <= bounds.north; lat += 0.5) {
+                for (let lon = bounds.west; lon <= bounds.east; lon += 0.5) {
+                    // Create realistic pollution patterns (higher in cities, industrial areas)
+                    let baseValue = Math.random() * 100 + 50;
+                    
+                    // Simulate higher pollution in northern India
+                    if (lat > 25) baseValue *= 1.5;
+                    
+                    // Add some noise
+                    baseValue += (Math.random() - 0.5) * 40;
+                    
+                    gridData.push({
+                        lat: lat,
+                        lon: lon,
+                        value: Math.max(20, Math.min(500, baseValue))
+                    });
+                }
+            }
+            
+            return gridData;
+        }
+        
         // Fetch and display sensor data
         async function fetchSensorData() {
             try {
-                // For MVP, we'll use a hardcoded list of major Indian cities as a proxy
-                const cities = ['Delhi', 'Mumbai', 'Kolkata', 'Chennai', 'Bengaluru', 'Pune'];
-                let allSensors = [];
-
-                for (const city of cities) {
-                    const response = await fetch(`${API_URL}/sensors?city=${city}`);
-                    const data = await response.json();
-                    allSensors = allSensors.concat(data);
+                updateStatus("Fetching sensor data...");
+                
+                // For demo purposes, use sample data instead of API call
+                const sensorData = generateSampleSensorData();
+                
+                // Clear existing sensors
+                if (sensorGroup) {
+                    map.removeLayer(sensorGroup);
                 }
                 
+                // Create new sensor group
+                sensorGroup = L.layerGroup().addTo(map);
+                
                 // Plot sensor markers
-                const sensorGroup = L.layerGroup().addTo(map);
-                allSensors.forEach(sensor => {
+                sensorData.forEach(sensor => {
+                    const color = getAQIColor(sensor.pm25);
                     const marker = L.circleMarker([sensor.lat, sensor.lon], {
-                        color: 'blue',
-                        fillColor: '#30f',
-                        fillOpacity: 0.5,
-                        radius: 5
+                        color: color,
+                        fillColor: color,
+                        fillOpacity: 0.7,
+                        radius: 8,
+                        stroke: true,
+                        weight: 2
                     }).addTo(sensorGroup);
-                    marker.bindPopup(`<b>${sensor.source}</b><br>PM2.5: ${sensor.pm25.toFixed(2)} µg/m³`);
+                    
+                    const aqi = pmToAQI(sensor.pm25);
+                    const category = getAQICategory(aqi);
+                    
+                    marker.bindPopup(`
+                        <strong>${sensor.source}</strong><br>
+                        <strong>PM2.5:</strong> ${sensor.pm25.toFixed(1)} µg/m³<br>
+                        <strong>AQI:</strong> ${aqi} (${category})
+                    `);
                 });
+                
+                updateStatus(`Loaded ${sensorData.length} sensors`);
+                
             } catch (error) {
                 console.error("Error fetching sensor data:", error);
+                updateStatus("Error loading sensor data - using sample data");
             }
         }
         
         // Fetch and display a predicted heatmap
         async function fetchAndRenderHeatmap() {
             try {
-                // Use a sample bounding box for Delhi for the MVP
-                const bbox = "76.84,28.35,77.4,28.89";
-                const response = await fetch(`${API_URL}/grid?bbox=${bbox}`);
-                const grid_data = await response.json();
-
-                // Convert data to Leaflet-Heat format: [[lat, lon, intensity], ...]
-                const heatData = grid_data.map(p => [p.lat, p.lon, p.value]);
+                updateStatus("Generating heatmap...");
                 
-                L.heatLayer(heatData, {
+                // For demo purposes, use sample grid data
+                const gridData = generateSampleGridData();
+                
+                // Convert data to Leaflet-Heat format: [[lat, lon, intensity], ...]
+                const heatData = gridData.map(p => [p.lat, p.lon, p.value / 500]); // Normalize to 0-1
+                
+                // Remove existing heatmap
+                if (heatmapLayer) {
+                    map.removeLayer(heatmapLayer);
+                }
+                
+                heatmapLayer = L.heatLayer(heatData, {
                     radius: 25,
                     blur: 15,
-                    max: 500, // Max value for color scaling
+                    max: 1.0,
                     gradient: {
                         0.0: 'green',
                         0.25: 'yellow',
@@ -84,15 +268,55 @@
                         1.0: 'darkred'
                     }
                 }).addTo(map);
-
+                
+                updateStatus("Heatmap loaded");
+                
             } catch (error) {
-                console.error("Error fetching heatmap data:", error);
+                console.error("Error generating heatmap:", error);
+                updateStatus("Error loading heatmap");
             }
         }
-
-        // Call functions to populate the map
-        fetchSensorData();
-        fetchAndRenderHeatmap();
+        
+        // Convert PM2.5 to AQI (simplified US EPA formula)
+        function pmToAQI(pm25) {
+            if (pm25 <= 12.0) return Math.round((50 / 12.0) * pm25);
+            else if (pm25 <= 35.4) return Math.round((99 - 51) / (35.4 - 12.1) * (pm25 - 12.1) + 51);
+            else if (pm25 <= 55.4) return Math.round((149 - 101) / (55.4 - 35.5) * (pm25 - 35.5) + 101);
+            else if (pm25 <= 150.4) return Math.round((199 - 151) / (150.4 - 55.5) * (pm25 - 55.5) + 151);
+            else if (pm25 <= 250.4) return Math.round((299 - 201) / (250.4 - 150.5) * (pm25 - 150.5) + 201);
+            else return Math.round((399 - 301) / (350.4 - 250.5) * (pm25 - 250.5) + 301);
+        }
+        
+        // Get AQI category
+        function getAQICategory(aqi) {
+            if (aqi <= 50) return "Good";
+            else if (aqi <= 100) return "Moderate";
+            else if (aqi <= 150) return "Unhealthy for Sensitive Groups";
+            else if (aqi <= 200) return "Unhealthy";
+            else if (aqi <= 300) return "Very Unhealthy";
+            else return "Hazardous";
+        }
+        
+        // Get color based on PM2.5 value
+        function getAQIColor(pm25) {
+            const aqi = pmToAQI(pm25);
+            if (aqi <= 50) return "green";
+            else if (aqi <= 100) return "yellow";
+            else if (aqi <= 150) return "orange";
+            else if (aqi <= 200) return "red";
+            else return "darkred";
+        }
+        
+        // Initialize everything when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMap();
+            
+            // Add a small delay to ensure map is fully loaded
+            setTimeout(() => {
+                fetchSensorData();
+                fetchAndRenderHeatmap();
+            }, 500);
+        });
     </script>
 </body>
 </html>
