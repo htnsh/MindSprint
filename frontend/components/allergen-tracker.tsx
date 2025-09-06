@@ -5,13 +5,42 @@ import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Leaf, Flower, TreePine } from "lucide-react"
 
-const allergenData = [
-  { name: "Tree Pollen", level: 65, icon: TreePine, color: "text-green-600", severity: "High" },
-  { name: "Grass Pollen", level: 30, icon: Leaf, color: "text-emerald-600", severity: "Low" },
-  { name: "Weed Pollen", level: 45, icon: Flower, color: "text-yellow-600", severity: "Medium" },
-]
+export function AllergenTracker({ pollenData }: { pollenData: any }) {
+  if (!pollenData) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Allergen Levels</CardTitle>
+          <CardDescription>Loading pollen data...</CardDescription>
+        </CardHeader>
+      </Card>
+    )
+  }
 
-export function AllergenTracker() {
+  const allergenData = [
+    { 
+      name: "Tree Pollen", 
+      level: pollenData.tree_pollen, 
+      risk: pollenData.tree_risk, 
+      icon: TreePine, 
+      color: "text-green-600" 
+    },
+    { 
+      name: "Grass Pollen", 
+      level: pollenData.grass_pollen, 
+      risk: pollenData.grass_risk, 
+      icon: Leaf, 
+      color: "text-emerald-600" 
+    },
+    { 
+      name: "Weed Pollen", 
+      level: pollenData.weed_pollen, 
+      risk: pollenData.weed_risk, 
+      icon: Flower, 
+      color: "text-yellow-600" 
+    },
+  ]
+
   return (
     <Card>
       <CardHeader>
@@ -30,14 +59,14 @@ export function AllergenTracker() {
                 </div>
                 <Badge
                   variant={
-                    allergen.severity === "High"
+                    allergen.risk === "High"
                       ? "destructive"
-                      : allergen.severity === "Medium"
-                        ? "default"
-                        : "secondary"
+                      : allergen.risk === "Moderate"
+                      ? "default"
+                      : "secondary"
                   }
                 >
-                  {allergen.severity}
+                  {allergen.risk}
                 </Badge>
               </div>
               <Progress value={allergen.level} className="h-2" />

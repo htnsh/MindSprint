@@ -38,6 +38,7 @@ env_path = BASE_DIR / ".env"
 load_dotenv(dotenv_path=env_path)
 
 WAQI_API_KEY = os.getenv("WAQI_API_TOKEN")
+AMBEE_API_KEY = os.getenv("AMBEE_API_TOKEN")
 
 
 
