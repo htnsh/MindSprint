@@ -132,15 +132,15 @@
 //   )
 // }
 "use client"
-//f5c9b33117f1bea4189b664836b2a6c88ccf29d8
+
 import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
-import { Users, Wind, Activity, Layers } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Layers, MapPin, RefreshCw, AlertCircle } from "lucide-react"
 
-// Type definitions at the very top
+// Types
 type Station = {
   id: number
   name: string
@@ -150,599 +150,185 @@ type Station = {
   status: string
 }
 
-type CommunityReport = {
-  id: number
-  lat: number
-  lng: number
-  type: string
-  severity: string
+// API Keys
+const WAQI_TOKEN = "fec89e5d35967b3907e0bdac5b9537ce3a8b9d2c"
+const NINJA_API_KEY = "zY6iVhzDvCz1khRwHrddCQ==azeYo7v0wNQQ5nqC"
+
+// AQI Helpers
+const getAQIStatus = (aqi: number) => {
+  if (aqi <= 50) return "good"
+  if (aqi <= 100) return "moderate"
+  if (aqi <= 150) return "unhealthy-sensitive"
+  if (aqi <= 200) return "unhealthy"
+  if (aqi <= 300) return "very-unhealthy"
+  return "hazardous"
 }
 
-// Mock data
-const monitoringStations: Station[] = [
-  { id: 1, name: "Downtown Station", lat: 37.7749, lng: -122.4194, aqi: 42, status: "good" },
-  { id: 2, name: "Golden Gate Park", lat: 37.7694, lng: -122.4862, aqi: 38, status: "good" },
-  { id: 3, name: "Mission District", lat: 37.7599, lng: -122.4148, aqi: 55, status: "moderate" },
-  { id: 4, name: "Chinatown", lat: 37.7941, lng: -122.4078, aqi: 48, status: "good" },
-  { id: 5, name: "Castro District", lat: 37.7609, lng: -122.435, aqi: 62, status: "moderate" },
-]
-
-const communityReports: CommunityReport[] = [
-  { id: 1, lat: 37.7849, lng: -122.4094, type: "smoke", severity: "high" },
-  { id: 2, lat: 37.7549, lng: -122.4294, type: "dust", severity: "medium" },
-  { id: 3, lat: 37.7749, lng: -122.4394, type: "pollen", severity: "low" },
-]
-
-// Component interfaces
-interface MapProps {
-  activeLayer: string
-  onStationSelect: (station: Station) => void
+const getAQIColor = (aqi: number) => {
+  if (aqi <= 50) return "#10b981"
+  if (aqi <= 100) return "#f59e0b"
+  if (aqi <= 150) return "#f97316"
+  if (aqi <= 200) return "#ef4444"
+  if (aqi <= 300) return "#7c2d12"
+  return "#4c1d95"
 }
 
-interface MapControlsProps {
-  activeLayer: string
-  onLayerChange: (layer: string) => void
+const getStatusBadge = (status: string) => {
+  const variants: Record<string, string> = {
+    good: "bg-green-100 text-green-800",
+    moderate: "bg-yellow-100 text-yellow-800",
+    "unhealthy-sensitive": "bg-orange-100 text-orange-800",
+    unhealthy: "bg-red-100 text-red-800",
+    "very-unhealthy": "bg-red-200 text-red-900",
+    hazardous: "bg-purple-100 text-purple-800",
+  }
+  return variants[status] || variants.moderate
 }
 
-interface MapLegendProps {
-  activeLayer: string
+const createCustomIcon = (color: string) => {
+  const size = 32
+  const svgString = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2 - 2}" fill="${color}" stroke="white" stroke-width="2"/>
+  </svg>`
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`
 }
 
-function InteractiveMap({ activeLayer, onStationSelect }: MapProps) {
+// Interactive Map
+function InteractiveMap({ stations, onStationSelect }: { stations: Station[]; onStationSelect: (s: Station) => void }) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
   const markersRef = useRef<any[]>([])
-  const [selectedStation, setSelectedStation] = useState<number | null>(null)
-
-  const getAQIColor = (aqi: number) => {
-    if (aqi <= 50) return "#10b981"
-    if (aqi <= 100) return "#f59e0b"
-    if (aqi <= 150) return "#f97316"
-    if (aqi <= 200) return "#ef4444"
-    return "#7c2d12"
-  }
-
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      good: "bg-green-100 text-green-800",
-      moderate: "bg-yellow-100 text-yellow-800",
-      unhealthy: "bg-red-100 text-red-800",
-    }
-    return variants[status as keyof typeof variants] || variants.good
-  }
-// <<<<<<< HEAD
-
-  const createCustomIcon = (color: string, iconType: 'station' | 'community') => {
-    const size = iconType === 'station' ? 32 : 20
-    const iconPath = iconType === 'station' 
-      ? `<path d="M${size/2-6},${size/2-4} L${size/2},${size/2-8} L${size/2+6},${size/2-4} L${size/2+4},${size/2+2} L${size/2-4},${size/2+2} Z" fill="white"/>` 
-      : `<circle cx="${size/2-3}" cy="${size/2-2}" r="2" fill="white"/><circle cx="${size/2+3}" cy="${size/2-2}" r="2" fill="white"/><path d="M${size/2-4},${size/2+2} Q${size/2},${size/2+4} ${size/2+4},${size/2+2}" stroke="white" stroke-width="1" fill="none"/>`
-    
-    const svgString = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 2}" fill="${color}" stroke="white" stroke-width="2"/>
-      ${iconPath}
-    </svg>`
-    
-    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`
-// =======
-  const createCustomIcon = (color: string, iconType: 'station' | 'community') => {
-    const size = iconType === 'station' ? 32 : 20
-
-    let iconPath: string
-
-    if (iconType === 'station') {
-      // Pre-calculate all coordinates to avoid template literal issues
-      const centerX = size / 2
-      const centerY = size / 2
-      const x1 = centerX - 6
-      const y1 = centerY - 4
-      const x2 = centerX
-      const y2 = centerY - 8
-      const x3 = centerX + 6
-      const y3 = centerY - 4
-      const x4 = centerX + 4
-      const y4 = centerY + 2
-      const x5 = centerX - 4
-      const y5 = centerY + 2
-
-      iconPath = <path d="M${x1},${y1} L${x2},${y2} L${x3},${y3} L${x4},${y4} L${x5},${y5} Z" fill="white" />
-    } else {
-      // Simple circles for community reports
-      const centerX = size / 2
-      const centerY = size / 2
-      const headX = centerX
-      const headY = centerY - 2
-      const bodyX = centerX
-      const bodyY = centerY + 3
-
-      iconPath = <circle cx="${headX}" cy="${headY}" r="3" fill="white"/><circle cx="${bodyX}" cy="${bodyY}" r="4" fill="white"/>
-    }
-
-    const svgString = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="${size / 2}" cy="${size / 2}" r="${(size / 2) - 2}" fill="${color}" stroke="white" stroke-width="2"/>
-    ${iconPath}
-  </svg>`
-
-    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString)
-  }
-
-  // Alternative: Even simpler approach with basic shapes
-  const createSimpleIcon = (color: string, iconType: 'station' | 'community') => {
-    const size = iconType === 'station' ? 32 : 20
-    const radius = (size / 2) - 2
-    const center = size / 2
-
-    let innerIcon = ''
-
-    if (iconType === 'station') {
-      // Simple triangle for wind/station
-      const topX = center
-      const topY = center - 4
-      const leftX = center - 4
-      const leftY = center + 2
-      const rightX = center + 4
-      const rightY = center + 2
-
-      innerIcon = <polygon points="${topX},${topY} ${leftX},${leftY} ${rightX},${rightY}" fill="white" />
-    } else {
-      // Simple dot for community
-      innerIcon = <circle cx="${center}" cy="${center}" r="4" fill="white" />
-    }
-
-    const svgString = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="${center}" cy="${center}" r="${radius}" fill="${color}" stroke="white" stroke-width="2"/>
-    ${innerIcon}
-  </svg>`
-
-    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString)
-  }
-
-  // Alternative simpler version if you're still having issues:
-  const createCustomIconSimple = (color: string, iconType: 'station' | 'community') => {
-    const size = iconType === 'station' ? 32 : 20
-
-    // Much simpler icons
-    const iconContent = iconType === 'station'
-      ? <text x="${size/2}" y="${size/2+2}" text-anchor="middle" fill="white" font-size="12">S</text>
-      : <text x="${size/2}" y="${size/2+2}" text-anchor="middle" fill="white" font-size="10">C</text>
-
-    const svgString = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="${size / 2}" cy="${size / 2}" r="${(size / 2) - 2}" fill="${color}" stroke="white" stroke-width="2"/>
-    ${iconContent}
-  </svg>`
-
-    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString)
-  }
-
-  // Even simpler alternative using basic shapes:
-  const createBasicIcon = (color: string, iconType: 'station' | 'community') => {
-    const size = iconType === 'station' ? 32 : 20
-
-    // Just colored circles with different sizes
-    const svgString = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="${size / 2}" cy="${size / 2}" r="${(size / 2) - 2}" fill="${color}" stroke="white" stroke-width="2"/>
-  </svg>`
-
-    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString)
-// >>>>>>> f5c9b33117f1bea4189b664836b2a6c88ccf29d8
-  }
 
   useEffect(() => {
     if (!mapRef.current) return
-
-    // Initialize Leaflet map
     const L = (window as any).L
     if (!L) {
-      // Load Leaflet if not already loaded
-      const link = document.createElement('link')
-      link.rel = 'stylesheet'
-      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css'
+      const link = document.createElement("link")
+      link.rel = "stylesheet"
+      link.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
       document.head.appendChild(link)
 
-      const script = document.createElement('script')
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js'
-      script.onload = () => initializeMap()
+      const script = document.createElement("script")
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"
+      script.onload = () => initMap()
       document.head.appendChild(script)
     } else {
-      initializeMap()
+      initMap()
     }
 
-    function initializeMap() {
+    function initMap() {
+      if (mapInstanceRef.current) mapInstanceRef.current.remove()
       const L = (window as any).L
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove()
-      }
-
-      // Create map centered on San Francisco
-      const map = L.map(mapRef.current).setView([37.7749, -122.4194], 12)
-
-      // Add OpenStreetMap tiles
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map)
-
-      mapInstanceRef.current = map
-      updateMarkers()
-    }
-
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove()
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    updateMarkers()
-  }, [activeLayer])
-
-  const updateMarkers = () => {
-    const L = (window as any).L
-    if (!L || !mapInstanceRef.current) return
-
-    // Clear existing markers
-    markersRef.current.forEach(marker => {
-      mapInstanceRef.current.removeLayer(marker)
-    })
-    markersRef.current = []
-
-    // Add monitoring station markers
-    monitoringStations.forEach(station => {
-      const icon = L.icon({
-        iconUrl: createCustomIcon(getAQIColor(station.aqi), 'station'),
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
-        popupAnchor: [0, -16]
-      })
-
-      const marker = L.marker([station.lat, station.lng], { icon })
-        .bindPopup(`
-          <div class="p-2">
-            <h4 class="font-semibold text-sm">${station.name}</h4>
-            <div class="mt-1">
-              <span class="inline-block px-2 py-1 text-xs rounded ${getStatusBadge(station.status)}">
-                AQI ${station.aqi}
-              </span>
-            </div>
-            <p class="text-xs text-gray-600 mt-1">Click for detailed data</p>
-          </div>
-        `)
-        .on('click', () => {
-          setSelectedStation(station.id)
-          onStationSelect(station)
-        })
-        .addTo(mapInstanceRef.current)
-
-      markersRef.current.push(marker)
-    })
-
-    // Add community reports if active
-    if (activeLayer === 'community') {
-      communityReports.forEach(report => {
-        const color = report.severity === 'high' ? '#ef4444' :
-          report.severity === 'medium' ? '#f59e0b' : '#10b981'
-
-        const icon = L.icon({
-          iconUrl: createCustomIcon(color, 'community'),
-          iconSize: [20, 20],
-          iconAnchor: [10, 10],
-          popupAnchor: [0, -10]
-        })
-
-        const marker = L.marker([report.lat, report.lng], { icon })
-          .bindPopup(`
-            <div class="p-2">
-              <h4 class="font-semibold text-sm capitalize">${report.type} Report</h4>
-              <p class="text-xs text-gray-600">Severity: ${report.severity}</p>
-            </div>
-          `)
-          .addTo(mapInstanceRef.current)
-
-        markersRef.current.push(marker)
-      })
-    }
-
-    // Add AQI overlay regions if active
-    if (activeLayer === 'aqi') {
-      const goodZone = L.circle([37.7694, -122.4862], {
-        color: '#10b981',
-        fillColor: '#10b981',
-        fillOpacity: 0.1,
-        radius: 1000
-      }).addTo(mapInstanceRef.current)
-
-      const moderateZone = L.circle([37.7599, -122.4148], {
-        color: '#f59e0b',
-        fillColor: '#f59e0b',
-        fillOpacity: 0.1,
-        radius: 800
-      }).addTo(mapInstanceRef.current)
-
-      markersRef.current.push(goodZone, moderateZone)
-    }
-  }
-
-// <<<<<<< HEAD
-// =======
-  const createCustomIcon = (color: string, iconType: 'station' | 'community') => {
-    const size = iconType === 'station' ? 32 : 20
-    const iconPath = iconType === 'station'
-      ? `<path d="M${size / 2 - 6},${size / 2 - 4} L${size / 2},${size / 2 - 8} L${size / 2 + 6},${size / 2 - 4} L${size / 2 + 4},${size / 2 + 2} L${size / 2 - 4},${size / 2 + 2} Z" fill="white"/>`
-      : `<circle cx="${size / 2 - 3}" cy="${size / 2 - 2}" r="2" fill="white"/>
-       <circle cx="${size / 2 + 3}" cy="${size / 2 - 2}" r="2" fill="white"/>
-       <path d="M${size / 2 - 4},${size / 2 + 2} Q${size / 2},${size / 2 + 4} ${size / 2 + 4},${size / 2 + 2}" stroke="white" stroke-width="1" fill="none"/>`
-
-    const svgString = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2 - 2}" fill="${color}" stroke="white" stroke-width="2"/>
-      ${iconPath}
-    </svg>`
-    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`
-  }
-
-
-  useEffect(() => {
-    if (!mapRef.current) return
-
-    // Initialize Leaflet map
-    const L = (window as any).L
-    if (!L) {
-      // Load Leaflet if not already loaded
-      const link = document.createElement('link')
-      link.rel = 'stylesheet'
-      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css'
-      document.head.appendChild(link)
-
-      const script = document.createElement('script')
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js'
-      script.onload = () => initializeMap()
-      document.head.appendChild(script)
-    } else {
-      initializeMap()
-    }
-
-    function initializeMap() {
-      const L = (window as any).L
-
-      // ✅ If an old map exists, destroy it
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.off()
-        mapInstanceRef.current.remove()
-        mapInstanceRef.current = null
-      }
-
-      // ✅ Reset Leaflet internal ID on the container div
-      if (mapRef.current && (mapRef.current as any)._leaflet_id) {
-        delete (mapRef.current as any)._leaflet_id
-      }
-
-      // ✅ Now safely create a new map
-      const map = L.map(mapRef.current!).setView([37.7749, -122.4194], 12)
-
+      const map = L.map(mapRef.current).setView([28.6139, 77.209], 6) // Default Delhi
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© OpenStreetMap contributors",
       }).addTo(map)
-
       mapInstanceRef.current = map
       updateMarkers()
     }
 
     return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.off()
-        mapInstanceRef.current.remove()
-        mapInstanceRef.current = null
-      }
-      if (mapRef.current && (mapRef.current as any)._leaflet_id) {
-        delete (mapRef.current as any)._leaflet_id
-      }
+      if (mapInstanceRef.current) mapInstanceRef.current.remove()
     }
   }, [])
 
   useEffect(() => {
     updateMarkers()
-  }, [activeLayer])
+  }, [stations])
 
   const updateMarkers = () => {
     const L = (window as any).L
     if (!L || !mapInstanceRef.current) return
-
-    // Clear existing markers
-    markersRef.current.forEach(marker => {
-      mapInstanceRef.current.removeLayer(marker)
-    })
+    markersRef.current.forEach((m) => mapInstanceRef.current.removeLayer(m))
     markersRef.current = []
 
-    // Add monitoring station markers
-    monitoringStations.forEach(station => {
+    stations.forEach((s) => {
       const icon = L.icon({
-        iconUrl: createCustomIcon(getAQIColor(station.aqi), 'station'),
+        iconUrl: createCustomIcon(getAQIColor(s.aqi)),
         iconSize: [32, 32],
         iconAnchor: [16, 16],
-        popupAnchor: [0, -16]
       })
-
-      const marker = L.marker([station.lat, station.lng], { icon })
-        .bindPopup(`
-          <div class="p-2">
-            <h4 class="font-semibold text-sm">${station.name}</h4>
-            <div class="mt-1">
-              <span class="inline-block px-2 py-1 text-xs rounded ${getStatusBadge(station.status)}">
-                AQI ${station.aqi}
-              </span>
-            </div>
-            <p class="text-xs text-gray-600 mt-1">Click for detailed data</p>
-          </div>
-        `)
-        .on('click', () => {
-          setSelectedStation(station.id)
-          onStationSelect(station)
-        })
+      const marker = L.marker([s.lat, s.lng], { icon })
+        .bindPopup(`<strong>${s.name}</strong><br/>AQI: ${s.aqi}`)
+        .on("click", () => onStationSelect(s))
         .addTo(mapInstanceRef.current)
-
       markersRef.current.push(marker)
     })
-
-    // Add community reports if active
-    if (activeLayer === 'community') {
-      communityReports.forEach(report => {
-        const color = report.severity === 'high' ? '#ef4444' :
-          report.severity === 'medium' ? '#f59e0b' : '#10b981'
-
-        const icon = L.icon({
-          iconUrl: createCustomIcon(color, 'community'),
-          iconSize: [20, 20],
-          iconAnchor: [10, 10],
-          popupAnchor: [0, -10]
-        })
-
-        const marker = L.marker([report.lat, report.lng], { icon })
-          .bindPopup(`
-            <div class="p-2">
-              <h4 class="font-semibold text-sm capitalize">${report.type} Report</h4>
-              <p class="text-xs text-gray-600">Severity: ${report.severity}</p>
-            </div>
-          `)
-          .addTo(mapInstanceRef.current)
-
-        markersRef.current.push(marker)
-      })
-    }
-
-    // Add AQI overlay regions if active
-    if (activeLayer === 'aqi') {
-      const goodZone = L.circle([37.7694, -122.4862], {
-        color: '#10b981',
-        fillColor: '#10b981',
-        fillOpacity: 0.1,
-        radius: 1000
-      }).addTo(mapInstanceRef.current)
-
-      const moderateZone = L.circle([37.7599, -122.4148], {
-        color: '#f59e0b',
-        fillColor: '#f59e0b',
-        fillOpacity: 0.1,
-        radius: 800
-      }).addTo(mapInstanceRef.current)
-
-      markersRef.current.push(goodZone, moderateZone)
+    if (stations.length === 1) {
+      mapInstanceRef.current.setView([stations[0].lat, stations[0].lng], 11)
     }
   }
 
-// >>>>>>> f5c9b33117f1bea4189b664836b2a6c88ccf29d8
-  return (
-    <div className="w-full h-full relative">
-      <div ref={mapRef} className="w-full h-full rounded-lg" />
-      
-      {/* Loading message */}
-      {!mapInstanceRef.current && (
-        <div className="absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-            <p className="text-sm text-gray-600">Loading map...</p>
-          </div>
-        </div>
-      )}
-    </div>
-  )
+  return <div ref={mapRef} className="w-full h-full rounded-lg" />
 }
 
-function MapControls({ activeLayer, onLayerChange }: MapControlsProps) {
-  const layers = [
-    { id: "aqi", name: "Air Quality Index", icon: Wind, description: "Real-time AQI data" },
-    { id: "pm25", name: "PM2.5 Levels", icon: Activity, description: "Fine particulate matter" },
-    { id: "pollen", name: "Pollen Forecast", icon: Activity, description: "Allergen predictions" },
-    { id: "community", name: "Community Reports", icon: Users, description: "User-submitted data" },
-  ]
-
+// Location Search
+function LocationSearch({ onSearch, loading }: { onSearch: (city: string) => void; loading: boolean }) {
+  const [query, setQuery] = useState("")
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Layers className="h-5 w-5" />
-          Map Layers
+        <CardTitle className="flex gap-2 items-center">
+          <MapPin className="h-5 w-5" /> Search City
         </CardTitle>
-        <CardDescription>Choose what data to display</CardDescription>
+        <CardDescription>Enter city to load AQI data</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {layers.map((layer) => {
-          const Icon = layer.icon
-          return (
-            <div key={layer.id} className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Icon className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <Label className="text-sm font-medium">{layer.name}</Label>
-                  <p className="text-xs text-muted-foreground">{layer.description}</p>
-                </div>
-              </div>
-              <Switch checked={activeLayer === layer.id} onCheckedChange={() => onLayerChange(layer.id)} />
-            </div>
-          )
-        })}
+      <CardContent>
+        <div className="flex gap-2">
+          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="e.g. Delhi, San Francisco" />
+          <Button onClick={() => onSearch(query)} disabled={loading || !query.trim()}>
+            {loading ? "Loading..." : "Go"}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )
 }
 
-function MapLegend({ activeLayer }: MapLegendProps) {
-  const legends = {
-    aqi: [
-      { range: "0-50", color: "#10b981", label: "Good", description: "Air quality is satisfactory" },
-      { range: "51-100", color: "#f59e0b", label: "Moderate", description: "Acceptable for most people" },
-      {
-        range: "101-150",
-        color: "#f97316",
-        label: "Unhealthy for Sensitive",
-        description: "Sensitive groups may experience symptoms",
-      },
-      { range: "151-200", color: "#ef4444", label: "Unhealthy", description: "Everyone may experience symptoms" },
-      { range: "201+", color: "#7c2d12", label: "Very Unhealthy", description: "Health alert for everyone" },
-    ],
-    pm25: [
-      { range: "0-12", color: "#10b981", label: "Good", description: "Little to no risk" },
-      { range: "12-35", color: "#f59e0b", label: "Moderate", description: "Acceptable for most people" },
-      { range: "35-55", color: "#f97316", label: "Unhealthy for Sensitive", description: "Sensitive groups at risk" },
-      { range: "55+", color: "#ef4444", label: "Unhealthy", description: "Health concerns for everyone" },
-    ],
-    pollen: [
-      { range: "Low", color: "#10b981", label: "0-2.4", description: "Minimal symptoms" },
-      { range: "Medium", color: "#f59e0b", label: "2.5-4.8", description: "Mild symptoms possible" },
-      { range: "High", color: "#f97316", label: "4.9-7.2", description: "Moderate symptoms" },
-      { range: "Very High", color: "#ef4444", label: "7.3+", description: "Severe symptoms likely" },
-    ],
-    community: [
-      { range: "Smoke", color: "#6b7280", label: "Smoke Reports", description: "User-reported smoke" },
-      { range: "Dust", color: "#a3a3a3", label: "Dust Reports", description: "User-reported dust" },
-      { range: "Odor", color: "#8b5cf6", label: "Odor Reports", description: "User-reported odors" },
-    ],
-  }
-
-  const currentLegend = legends[activeLayer as keyof typeof legends] || legends.aqi
-
+// Map Controls
+function MapControls({ onRefresh, onMyLocation, loading }: { onRefresh: () => void; onMyLocation: () => void; loading: boolean }) {
   return (
-    <Card className="mt-4">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Legend</CardTitle>
-        <CardDescription>
-          {activeLayer === "aqi" && "Air Quality Index ranges"}
-          {activeLayer === "pm25" && "PM2.5 concentration (μg/m³)"}
-          {activeLayer === "pollen" && "Pollen count (grains/m³)"}
-          {activeLayer === "community" && "Community report types"}
-        </CardDescription>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Layers className="h-5 w-5" />
+            Map Controls
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={onMyLocation} disabled={loading}>
+              <MapPin className="h-4 w-4" /> My Location
+            </Button>
+            <Button variant="outline" size="sm" onClick={onRefresh} disabled={loading}>
+              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh
+            </Button>
+          </div>
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {currentLegend.map((item, index) => (
-          <div key={index} className="flex items-center gap-3">
-            <div className="w-4 h-4 rounded-full border border-gray-300" style={{ backgroundColor: item.color }}></div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">{item.range}</span>
-                <Badge variant="outline" className="text-xs">
-                  {item.label}
-                </Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">{item.description}</p>
-            </div>
+    </Card>
+  )
+}
+
+// Map Legend
+function MapLegend() {
+  const items = [
+    { range: "0-50", color: "#10b981", label: "Good" },
+    { range: "51-100", color: "#f59e0b", label: "Moderate" },
+    { range: "101-150", color: "#f97316", label: "Unhealthy Sensitive" },
+    { range: "151-200", color: "#ef4444", label: "Unhealthy" },
+    { range: "201-300", color: "#7c2d12", label: "Very Unhealthy" },
+    { range: "301+", color: "#4c1d95", label: "Hazardous" },
+  ]
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Legend</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {items.map((it, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: it.color }}></div>
+            <span className="text-sm">{it.range} - {it.label}</span>
           </div>
         ))}
       </CardContent>
@@ -750,41 +336,122 @@ function MapLegend({ activeLayer }: MapLegendProps) {
   )
 }
 
-// Main demo component
-export default function AirQualityMapDemo() {
-  const [activeLayer, setActiveLayer] = useState("aqi")
-  const [selectedStation, setSelectedStation] = useState<Station | null>(null)
+// Main App
+export default function AirQualityApp() {
+  const [stations, setStations] = useState<Station[]>([])
+  const [selected, setSelected] = useState<Station | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleStationSelect = (station: Station) => {
-    setSelectedStation(station)
-    console.log("Selected station:", station)
+  const fetchCityAQI = async (city: string) => {
+    setLoading(true)
+    setError(null)
+    try {
+      // 1. Get coordinates
+      const geoRes = await fetch(`https://api.api-ninjas.com/v1/geocoding?city=${encodeURIComponent(city)}`, {
+        headers: { "X-Api-Key": NINJA_API_KEY },
+      })
+      const geo = await geoRes.json()
+      const lat = geo[0]?.latitude
+      const lon = geo[0]?.longitude
+      if (!lat || !lon) throw new Error("No coordinates")
+
+      // 2. Get AQI
+      const aqiRes = await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${WAQI_TOKEN}`)
+      const data = await aqiRes.json()
+      if (data.status !== "ok") throw new Error("No AQI data")
+
+      const s: Station = {
+        id: Date.now(),
+        name: data.data.city.name,
+        lat,
+        lng: lon,
+        aqi: data.data.aqi,
+        status: getAQIStatus(data.data.aqi),
+      }
+      setStations([s])
+      setSelected(s)
+    } catch (e: any) {
+      console.error(e)
+      setError("Failed to load AQI. Showing demo data.")
+      const demo: Station = {
+        id: Date.now(),
+        name: `${city} Demo Station`,
+        lat: 28.6,
+        lng: 77.2,
+        aqi: Math.floor(Math.random() * 200),
+        status: "moderate",
+      }
+      setStations([demo])
+      setSelected(demo)
+    } finally {
+      setLoading(false)
+    }
   }
+
+  const handleRefresh = () => {
+    if (selected) fetchCityAQI(selected.name)
+  }
+
+  const handleMyLocation = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        try {
+          const lat = pos.coords.latitude
+          const lon = pos.coords.longitude
+          const aqiRes = await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${WAQI_TOKEN}`)
+          const data = await aqiRes.json()
+          if (data.status === "ok") {
+            const s: Station = {
+              id: Date.now(),
+              name: data.data.city.name,
+              lat,
+              lng: lon,
+              aqi: data.data.aqi,
+              status: getAQIStatus(data.data.aqi),
+            }
+            setStations([s])
+            setSelected(s)
+          }
+        } catch (err) {
+          console.error(err)
+        }
+      })
+    }
+  }
+
+  useEffect(() => {
+    fetchCityAQI("Delhi") // Default load
+  }, [])
 
   return (
     <div className="w-full h-screen flex gap-4 p-4 bg-gray-50">
-      <div className="flex-1 bg-white rounded-lg shadow-sm overflow-hidden">
-        <InteractiveMap activeLayer={activeLayer} onStationSelect={handleStationSelect} />
+      <div className="flex-1 bg-white rounded-lg shadow-sm">
+        <InteractiveMap stations={stations} onStationSelect={setSelected} />
       </div>
       <div className="w-80 space-y-4 overflow-y-auto">
-        <MapControls activeLayer={activeLayer} onLayerChange={setActiveLayer} />
-        <MapLegend activeLayer={activeLayer} />
-        {selectedStation && (
+        <LocationSearch onSearch={fetchCityAQI} loading={loading} />
+        <MapControls onRefresh={handleRefresh} onMyLocation={handleMyLocation} loading={loading} />
+        <MapLegend />
+        {error && (
+          <Card className="bg-yellow-50 border-yellow-200">
+            <CardContent className="p-2 text-sm text-yellow-800 flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" /> {error}
+            </CardContent>
+          </Card>
+        )}
+        {selected && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Station Details</CardTitle>
+              <CardTitle>Station Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm">
-                Selected: <strong>{selectedStation.name}</strong>
-              </p>
-              <p className="text-sm">
-                AQI: <strong>{selectedStation.aqi}</strong> ({selectedStation.status})
-              </p>
+              <p><strong>{selected.name}</strong></p>
+              <Badge className={getStatusBadge(selected.status)}>AQI {selected.aqi}</Badge>
             </CardContent>
           </Card>
         )}
       </div>
     </div>
   )
-}
 }
