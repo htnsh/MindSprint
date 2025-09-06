@@ -1,136 +1,3 @@
-//HEAD
-// "use client"
-
-// import { useState } from "react"
-// import { Card } from "@/components/ui/card"
-// import { Badge } from "@/components/ui/badge"
-// import { Users, Wind } from "lucide-react"
-
-// interface MapProps {
-//   activeLayer: string
-//   onStationSelect: (station: any) => void
-// }
-
-// // Mock data for demonstration
-// const monitoringStations = [
-//   { id: 1, name: "Downtown Station", lat: 37.7749, lng: -122.4194, aqi: 42, status: "good" },
-//   { id: 2, name: "Golden Gate Park", lat: 37.7694, lng: -122.4862, aqi: 38, status: "good" },
-//   { id: 3, name: "Mission District", lat: 37.7599, lng: -122.4148, aqi: 55, status: "moderate" },
-//   { id: 4, name: "Chinatown", lat: 37.7941, lng: -122.4078, aqi: 48, status: "good" },
-//   { id: 5, name: "Castro District", lat: 37.7609, lng: -122.435, aqi: 62, status: "moderate" },
-// ]
-
-// const communityReports = [
-//   { id: 1, lat: 37.7849, lng: -122.4094, type: "smoke", severity: "high" },
-//   { id: 2, lat: 37.7549, lng: -122.4294, type: "dust", severity: "medium" },
-//   { id: 3, lat: 37.7749, lng: -122.4394, type: "pollen", severity: "low" },
-// ]
-
-// export function InteractiveMap({ activeLayer, onStationSelect }: MapProps) {
-//   const [selectedMarker, setSelectedMarker] = useState<number | null>(null)
-
-//   const getAQIColor = (aqi: number) => {
-//     if (aqi <= 50) return "#10b981" // Green - Good
-//     if (aqi <= 100) return "#f59e0b" // Yellow - Moderate
-//     if (aqi <= 150) return "#f97316" // Orange - Unhealthy for Sensitive
-//     if (aqi <= 200) return "#ef4444" // Red - Unhealthy
-//     return "#7c2d12" // Maroon - Very Unhealthy
-//   }
-
-//   const getStatusBadge = (status: string) => {
-//     const variants = {
-//       good: "bg-green-100 text-green-800",
-//       moderate: "bg-yellow-100 text-yellow-800",
-//       unhealthy: "bg-red-100 text-red-800",
-//     }
-//     return variants[status as keyof typeof variants] || variants.good
-//   }
-
-//   return (
-//     <div className="w-full h-full relative bg-gradient-to-br from-blue-100 to-green-100 dark:from-gray-800 dark:to-gray-700">
-//       {/* Mock Map Background */}
-//       <div className="absolute inset-0 opacity-20">
-//         <svg width="100%" height="100%" className="text-gray-400">
-//           <defs>
-//             <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
-//               <path d="M 50 0 L 0 0 0 50" fill="none" stroke="currentColor" strokeWidth="1" />
-//             </pattern>
-//           </defs>
-//           <rect width="100%" height="100%" fill="url(#grid)" />
-//         </svg>
-//       </div>
-
-//       {/* Color-coded regions based on active layer */}
-//       <div className="absolute inset-0">
-//         {activeLayer === "aqi" && (
-//           <>
-//             <div className="absolute top-20 left-20 w-32 h-32 rounded-full bg-green-200/60 border-2 border-green-400"></div>
-//             <div className="absolute top-40 right-32 w-40 h-40 rounded-full bg-yellow-200/60 border-2 border-yellow-400"></div>
-//             <div className="absolute bottom-32 left-32 w-36 h-36 rounded-full bg-green-200/60 border-2 border-green-400"></div>
-//           </>
-//         )}
-//       </div>
-
-//       {/* Monitoring Stations */}
-//       {monitoringStations.map((station) => (
-//         <div
-//           key={station.id}
-//           className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
-//           style={{
-//             left: `${((station.lng + 122.5) / 0.2) * 100}%`,
-//             top: `${((37.8 - station.lat) / 0.1) * 100}%`,
-//           }}
-//           onClick={() => {
-//             setSelectedMarker(station.id)
-//             onStationSelect(station)
-//           }}
-//         >
-//           <div className="relative">
-//             <div
-//               className="w-6 h-6 rounded-full border-2 border-white shadow-lg flex items-center justify-center"
-//               style={{ backgroundColor: getAQIColor(station.aqi) }}
-//             >
-//               <Wind className="h-3 w-3 text-white" />
-//             </div>
-//             {selectedMarker === station.id && (
-//               <Card className="absolute top-8 left-1/2 transform -translate-x-1/2 w-48 z-10">
-//                 <div className="p-3">
-//                   <h4 className="font-semibold text-sm">{station.name}</h4>
-//                   <div className="flex items-center gap-2 mt-1">
-//                     <Badge className={getStatusBadge(station.status)}>AQI {station.aqi}</Badge>
-//                   </div>
-//                   <p className="text-xs text-muted-foreground mt-1">Click for detailed data</p>
-//                 </div>
-//               </Card>
-//             )}
-//           </div>
-//         </div>
-//       ))}
-
-//       {/* Community Reports */}
-//       {activeLayer === "community" &&
-//         communityReports.map((report) => (
-//           <div
-//             key={report.id}
-//             className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
-//             style={{
-//               left: `${((report.lng + 122.5) / 0.2) * 100}%`,
-//               top: `${((37.8 - report.lat) / 0.1) * 100}%`,
-//             }}
-//           >
-//             <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow-lg flex items-center justify-center">
-//               <Users className="h-2 w-2 text-white" />
-//             </div>
-//           </div>
-//         ))}
-
-//       {/* Map Attribution */}
-//       <div className="absolute bottom-4 right-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded px-2 py-1">
-//         <p className="text-xs text-muted-foreground">Interactive Air Quality Map</p>
-//       </div>
-//     </div>
-//   )
-// }
 // Interactive Map
 import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -216,11 +83,9 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
     const iconPath =
       iconType === "station"
         ? `<path d="M${size / 2 - 6},${size / 2 - 4} L${size / 2},${size / 2 - 8} L${size / 2 + 6},${size / 2 - 4} L${size / 2 + 4},${size / 2 + 2} L${size / 2 - 4},${size / 2 + 2} Z" fill="white"/>`
-        : `<circle cx="${size / 2 - 3}" cy="${size / 2 - 2}" r="2" fill="white"/><circle cx="${
-            size / 2 + 3
-          }" cy="${size / 2 - 2}" r="2" fill="white"/><path d="M${size / 2 - 4},${size / 2 + 2} Q${
-            size / 2
-          },${size / 2 + 4} ${size / 2 + 4},${size / 2 + 2}" stroke="white" stroke-width="1" fill="none"/>`
+        : `<circle cx="${size / 2 - 3}" cy="${size / 2 - 2}" r="2" fill="white"/><circle cx="${size / 2 + 3
+        }" cy="${size / 2 - 2}" r="2" fill="white"/><path d="M${size / 2 - 4},${size / 2 + 2} Q${size / 2
+        },${size / 2 + 4} ${size / 2 + 4},${size / 2 + 2}" stroke="white" stroke-width="1" fill="none"/>`
 
     const svgString = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
       <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2 - 2}" fill="${color}" stroke="white" stroke-width="2"/>
@@ -253,7 +118,7 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove()
       }
-      
+
       // Default to Delhi, India coordinates
       const map = L.map(mapRef.current).setView([28.6139, 77.2090], 10)
 
@@ -280,6 +145,12 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
     const L = (window as any).L
     if (!L || !mapInstanceRef.current) return
 
+    // ✅ Guard against undefined/null stations
+    if (!stations || stations.length === 0) {
+      console.warn("No stations available to render")
+      return
+    }
+
     // Remove old markers
     markersRef.current.forEach((marker) => {
       mapInstanceRef.current.removeLayer(marker)
@@ -295,24 +166,31 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
         popupAnchor: [0, -16],
       })
 
-      const pollutantInfo = station.pollutants ? Object.entries(station.pollutants)
-        .filter(([key, value]) => value !== undefined)
-        .map(([key, value]) => `<div class="text-xs"><strong>${key.toUpperCase()}:</strong> ${value}</div>`)
-        .join('') : ''
+      const pollutantInfo = station.pollutants
+        ? Object.entries(station.pollutants)
+          .filter(([_, value]) => value !== undefined)
+          .map(([key, value]) => `<div class="text-xs"><strong>${key.toUpperCase()}:</strong> ${value}</div>`)
+          .join("")
+        : ""
 
       const marker = L.marker([station.lat, station.lng], { icon })
         .bindPopup(`
-          <div class="p-3 min-w-[200px]">
-            <h4 class="font-semibold text-sm mb-2">${station.name}</h4>
-            <div class="mb-2">
-              <span class="inline-block px-2 py-1 text-xs rounded ${getStatusBadge(station.status)}">
-                AQI ${station.aqi}
-              </span>
-            </div>
-            ${pollutantInfo}
-            ${station.time ? `<div class="text-xs text-gray-500 mt-2">Updated: ${new Date(station.time).toLocaleString()}</div>` : ''}
+        <div class="p-3 min-w-[200px]">
+          <h4 class="font-semibold text-sm mb-2">${station.name}</h4>
+          <div class="mb-2">
+            <span class="inline-block px-2 py-1 text-xs rounded ${getStatusBadge(station.status)}">
+              AQI ${station.aqi}
+            </span>
           </div>
-        `)
+          ${pollutantInfo}
+          ${station.time
+            ? `<div class="text-xs text-gray-500 mt-2">Updated: ${new Date(
+              station.time
+            ).toLocaleString()}</div>`
+            : ""
+          }
+        </div>
+      `)
         .on("click", () => onStationSelect(station))
         .addTo(mapInstanceRef.current)
 
@@ -320,21 +198,22 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
     })
 
     // Center map on the stations
-    if (stations.length > 0) {
-      if (stations.length === 1) {
-        mapInstanceRef.current.setView([stations[0].lat, stations[0].lng], 12)
-      } else {
-        // Fit bounds to show all stations
-        const group = new L.featureGroup(markersRef.current)
-        mapInstanceRef.current.fitBounds(group.getBounds().pad(0.1))
-      }
+    if (stations.length === 1) {
+      mapInstanceRef.current.setView([stations[0].lat, stations[0].lng], 12)
+    } else {
+      const group = new L.featureGroup(markersRef.current)
+      mapInstanceRef.current.fitBounds(group.getBounds().pad(0.1))
     }
 
-    // Add community reports if active
-    if (activeLayer === "community") {
+    // ✅ Community reports only if data exists
+    if (activeLayer === "community" && communityReports && communityReports.length > 0) {
       communityReports.forEach((report) => {
         const color =
-          report.severity === "high" ? "#ef4444" : report.severity === "medium" ? "#f59e0b" : "#10b981"
+          report.severity === "high"
+            ? "#ef4444"
+            : report.severity === "medium"
+              ? "#f59e0b"
+              : "#10b981"
 
         const icon = L.icon({
           iconUrl: createCustomIcon(color, "community"),
@@ -345,18 +224,19 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
 
         const marker = L.marker([report.lat, report.lng], { icon })
           .bindPopup(`
-            <div class="p-2">
-              <h4 class="font-semibold text-sm capitalize">${report.type} Report</h4>
-              <p class="text-xs text-gray-600">Severity: ${report.severity}</p>
-              ${report.description ? `<p class="text-xs mt-1">${report.description}</p>` : ''}
-            </div>
-          `)
+          <div class="p-2">
+            <h4 class="font-semibold text-sm capitalize">${report.type} Report</h4>
+            <p class="text-xs text-gray-600">Severity: ${report.severity}</p>
+            ${report.description ? `<p class="text-xs mt-1">${report.description}</p>` : ""}
+          </div>
+        `)
           .addTo(mapInstanceRef.current)
 
         markersRef.current.push(marker)
       })
     }
   }
+
 
   return (
     <div className="w-full h-full relative">
@@ -393,7 +273,7 @@ export function LocationSearch({ onLocationSearch, loading }: {
   }
 
   const popularCities = [
-    "Delhi", "Mumbai", "Beijing", "London", "New York", "Los Angeles", 
+    "Delhi", "Mumbai", "Beijing", "London", "New York", "Los Angeles",
     "Tokyo", "Paris", "São Paulo", "Mexico City", "Shanghai", "Bangkok"
   ]
 
@@ -499,8 +379,8 @@ export function MapControls({ activeLayer, onLayerChange, onRefresh, onGetMyLoca
                   <p className="text-xs text-muted-foreground">{layer.description}</p>
                 </div>
               </div>
-              <Switch 
-                checked={activeLayer === layer.id} 
+              <Switch
+                checked={activeLayer === layer.id}
                 onCheckedChange={() => onLayerChange(layer.id)}
                 disabled={loading}
               />
@@ -599,7 +479,7 @@ export default function AirQualityApp() {
   }
 
   // Geocode city name to coordinates using your API
-  const geocodeLocation = async (location: string): Promise<{lat: number, lng: number} | null> => {
+  const geocodeLocation = async (location: string): Promise<{ lat: number, lng: number } | null> => {
     try {
       const apiKey = "zY6iVhzDvCz1khRwHrddCQ==azeYo7v0wNQQ5nqC"
       const response = await fetch(`https://api.api-ninjas.com/v1/geocoding?city=${encodeURIComponent(location)}`, {
@@ -608,7 +488,7 @@ export default function AirQualityApp() {
         }
       })
       const data = await response.json()
-      
+
       if (data && data.length > 0) {
         return {
           lat: data[0].latitude,
@@ -618,12 +498,12 @@ export default function AirQualityApp() {
       return null
     } catch (error) {
       console.error('Geocoding API error:', error)
-      
+
       // Fallback to OpenStreetMap Nominatim if your API fails
       try {
         const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1`)
         const data = await response.json()
-        
+
         if (data && data.length > 0) {
           return {
             lat: parseFloat(data[0].lat),
@@ -633,19 +513,19 @@ export default function AirQualityApp() {
       } catch (fallbackError) {
         console.error('Fallback geocoding error:', fallbackError)
       }
-      
+
       return null
     }
   }
 
   // Get coordinates from location using various methods
-  const getLocationCoordinates = async (location: string): Promise<{lat: number, lng: number}> => {
+  const getLocationCoordinates = async (location: string): Promise<{ lat: number, lng: number }> => {
     // Try geocoding first
     const coords = await geocodeLocation(location)
     if (coords) return coords
 
     // Fallback coordinates for major cities
-    const cityCoords: {[key: string]: {lat: number, lng: number}} = {
+    const cityCoords: { [key: string]: { lat: number, lng: number } } = {
       "delhi": { lat: 28.6139, lng: 77.2090 },
       "mumbai": { lat: 19.0760, lng: 72.8777 },
       "bangalore": { lat: 12.9716, lng: 77.5946 },
@@ -668,14 +548,14 @@ export default function AirQualityApp() {
   const fetchAirQualityData = async (location: string = "Delhi") => {
     setLoading(true)
     setError(null)
-    
+
     try {
       // Get coordinates for the location
       const coords = await getLocationCoordinates(location)
-      
+
       // Try multiple API approaches
       let data = null
-      
+
       // Method 1: Try direct API call with jsonp (may work in some cases)
       try {
         const response = await fetch(`https://api.waqi.info/feed/${encodeURIComponent(location)}/?token=${WAQI_API_TOKEN}`, {
@@ -709,7 +589,7 @@ export default function AirQualityApp() {
         try {
           const proxyUrl = 'https://corsproxy.io/?'
           const targetUrl = `https://api.waqi.info/feed/${encodeURIComponent(location)}/?token=${WAQI_API_TOKEN}`
-          
+
           const response = await fetch(`${proxyUrl}${encodeURIComponent(targetUrl)}`)
           if (response.ok) {
             data = await response.json()
@@ -721,7 +601,7 @@ export default function AirQualityApp() {
 
       if (data && data.status === "ok" && data.data) {
         const stationData = data.data
-        
+
         const station: Station = {
           id: stationData.idx || Date.now(),
           name: stationData.city?.name || location,
@@ -749,11 +629,11 @@ export default function AirQualityApp() {
       }
     } catch (err) {
       console.error("Error fetching air quality data:", err)
-      
+
       // Generate realistic demo data with real coordinates
       const coords = await getLocationCoordinates(location)
       console.log(`Creating demo station for ${location} at:`, coords)
-      
+
       const demoStation: Station = {
         id: Date.now(),
         name: `${location} Monitoring Station`,
@@ -773,7 +653,7 @@ export default function AirQualityApp() {
         time: new Date().toISOString()
       }
       demoStation.status = getAQIStatusFromValue(demoStation.aqi)
-      
+
       // Clear and reset stations
       setStations([])
       setTimeout(() => {
@@ -789,18 +669,18 @@ export default function AirQualityApp() {
   const fetchNearbyStations = async (location: string) => {
     setLoading(true)
     setError(null)
-    
+
     try {
       const coords = await getLocationCoordinates(location)
-      
+
       // Generate multiple nearby stations with realistic data
       const nearbyStations: Station[] = []
       const numStations = Math.floor(Math.random() * 4) + 2 // 2-5 stations
-      
+
       for (let i = 0; i < numStations; i++) {
         const latOffset = (Math.random() - 0.5) * 0.2 // ±0.1 degree variation
         const lngOffset = (Math.random() - 0.5) * 0.2
-        
+
         const station: Station = {
           id: Date.now() + i,
           name: `${location} Station ${i + 1}`,
@@ -853,14 +733,14 @@ export default function AirQualityApp() {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords
-          
+
           try {
             // Reverse geocode to get city name
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
             const data = await response.json()
-            
+
             const cityName = data.address?.city || data.address?.town || data.address?.village || "Your Location"
-            
+
             // Create a station at user's location
             const station: Station = {
               id: Date.now(),
@@ -881,7 +761,7 @@ export default function AirQualityApp() {
               time: new Date().toISOString()
             }
             station.status = getAQIStatusFromValue(station.aqi)
-            
+
             setStations([station])
             setCurrentLocation(cityName)
             setError(null)
@@ -927,26 +807,26 @@ export default function AirQualityApp() {
   return (
     <div className="w-full h-screen flex gap-4 p-4 bg-gray-50">
       <div className="flex-1 bg-white rounded-lg shadow-sm overflow-hidden">
-        <InteractiveMap 
-          activeLayer={activeLayer} 
+        <InteractiveMap
+          activeLayer={activeLayer}
           stations={stations}
-          onStationSelect={handleStationSelect} 
+          onStationSelect={handleStationSelect}
         />
       </div>
-      
+
       <div className="w-80 space-y-4 overflow-y-auto">
         <LocationSearch onLocationSearch={handleLocationSearch} loading={loading} />
-        
-        <MapControls 
-          activeLayer={activeLayer} 
+
+        <MapControls
+          activeLayer={activeLayer}
           onLayerChange={setActiveLayer}
           onRefresh={handleRefresh}
           onGetMyLocation={handleGetMyLocation}
           loading={loading}
         />
-        
+
         <MapLegend activeLayer={activeLayer} />
-        
+
         {error && (
           <Card className="border-yellow-200 bg-yellow-50">
             <CardContent className="p-4">
@@ -958,7 +838,7 @@ export default function AirQualityApp() {
             </CardContent>
           </Card>
         )}
-        
+
         {selectedStation && (
           <Card>
             <CardHeader>
