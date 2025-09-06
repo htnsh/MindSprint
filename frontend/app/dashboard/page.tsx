@@ -11,7 +11,6 @@ import { AirQualityChart } from "@/components/air-quality-chart"
 import { AllergenTracker } from "@/components/allergen-tracker"
 import { HealthInsights } from "@/components/health-insights"
 import { LocationSelector } from "@/components/location-selector"
-import { AIChatbot } from "@/components/ai-chatbot"
 import { Navigation } from "@/components/navigation"
 
 export default function DashboardPage() {
@@ -140,7 +139,6 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      <AIChatbot />
     </div>
   )
 }

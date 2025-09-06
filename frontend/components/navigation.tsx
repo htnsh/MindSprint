@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Wind, LayoutDashboard, Map, Users, Bell, Menu, X, LogOut } from "lucide-react"
+import { Wind, LayoutDashboard, Map, Users, Bell, MessageCircle, Menu, X, LogOut } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 
 export function Navigation() {
@@ -17,6 +17,7 @@ export function Navigation() {
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Map", href: "/map", icon: Map },
     { name: "Community", href: "/community", icon: Users },
+    { name: "AI Chat", href: "/chatbot", icon: MessageCircle },
     { name: "Notifications", href: "/notifications", icon: Bell, badge: 2 },
   ]
 

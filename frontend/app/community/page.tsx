@@ -6,7 +6,6 @@ import { Plus, Users } from "lucide-react"
 import { ReportSubmissionForm } from "@/components/report-submission-form"
 import { CommunityFeed } from "@/components/community-feed"
 import { ReportStats } from "@/components/report-stats"
-import { AIChatbot } from "@/components/ai-chatbot"
 import { Navigation } from "@/components/navigation"
 
 export default function CommunityPage() {
@@ -50,7 +49,6 @@ export default function CommunityPage() {
         </Tabs>
       </main>
 
-      <AIChatbot />
     </div>
   )
 }

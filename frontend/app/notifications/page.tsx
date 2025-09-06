@@ -10,7 +10,6 @@ import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, Bell, Settings, AlertTriangle, CheckCircle, Info } from "lucide-react"
 import Link from "next/link"
-import { AIChatbot } from "@/components/ai-chatbot"
 
 interface Notification {
   id: string
@@ -277,7 +276,6 @@ export default function NotificationsPage() {
         </Tabs>
       </main>
 
-      <AIChatbot />
     </div>
   )
 }

@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge"
 import { InteractiveMap } from "@/components/interactive-map"
 import { MapControls } from "@/components/map-controls"
 import { MapLegend } from "@/components/map-legend"
-import { AIChatbot } from "@/components/ai-chatbot"
 import { Navigation } from "@/components/navigation"
 
 export default function MapPage() {
@@ -85,7 +84,6 @@ export default function MapPage() {
         </div>
       </div>
 
-      <AIChatbot />
     </div>
   )
 }
