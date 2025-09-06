@@ -164,7 +164,7 @@ export function AIChatbot({ className }: ChatbotProps) {
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <Bot className="h-5 w-5 text-emerald-600" />
-          Air Quality Assistant
+          AI Assistant
         </CardTitle>
         <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8">
           <X className="h-4 w-4" />
