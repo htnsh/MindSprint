@@ -221,6 +221,7 @@ export default function DashboardPage() {
   const [location, setLocation] = useState("Ahmedabad")
   const [aqiData, setAqiData] = useState<any>(null)
   const [chartData, setChartData] = useState<any[]>([])
+  const [pollenData, setPollenData] = useState<any>(null)
 
   // Redirect if not logged in
   useEffect(() => {
@@ -246,22 +247,22 @@ export default function DashboardPage() {
     }
   }, [location])
 
-  // Fetch 24-hour history for chart
-  useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const res = await fetch(`http://127.0.0.1:8000/api/aqi/history/${location}/`)
-        const data = await res.json()
-        setChartData(data.history) // ✅ backend already returns 3h slots
-        console.log("Chart History Data:", data.history)
-      } catch (error) {
-        console.error("Error fetching AQI history:", error)
-      }
-    }
-    if (location) {
-      fetchHistory()
-    }
-  }, [location])
+  // useEffect(() => {
+  //   const fetchPollen = async () => {
+  //     try {
+  //       const res = await fetch(`http://127.0.0.1:8000/api/pollen/${location}/`)
+  //       const data = await res.json()
+  //       setPollenData(data)
+  //       console.log("Pollen API Data:", data)
+  //     } catch (error) {
+  //       console.error("Error fetching Pollen data:", error)
+  //     }
+  //   }
+  //   if (location) {
+  //     fetchPollen()
+  //   }
+  // }, [location])
+
 
   if (loading) {
     return <div>Loading...</div>
@@ -305,17 +306,42 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Pollen placeholder (static for now, API later) */}
+          {/* ✅ Dynamic Pollen Card */}
           <Card className="border-l-4 border-l-yellow-500 hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Pollen Level</CardTitle>
               <Activity className="h-4 w-4 text-yellow-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">Medium</div>
-              <p className="text-xs text-muted-foreground">Tree pollen: 6.2 grains/m³</p>
+              {pollenData ? (
+                <>
+                  {/* Find dominant pollen */}
+                  {(() => {
+                    const pollenTypes = [
+                      { name: "Tree", count: pollenData.tree_pollen, risk: pollenData.tree_risk },
+                      { name: "Grass", count: pollenData.grass_pollen, risk: pollenData.grass_risk },
+                      { name: "Weed", count: pollenData.weed_pollen, risk: pollenData.weed_risk },
+                    ]
+                    const dominant = pollenTypes.reduce((max, p) => (p.count > max.count ? p : max), pollenTypes[0])
+
+                    return (
+                      <>
+                        <div className="text-2xl font-bold text-yellow-600">
+                          {dominant.risk}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {dominant.name} pollen: {dominant.count} grains/m³
+                        </p>
+                      </>
+                    )
+                  })()}
+                </>
+              ) : (
+                <div className="text-muted-foreground text-sm">Loading...</div>
+              )}
             </CardContent>
           </Card>
+
 
           {/* Community Reports (fake for now) */}
           <Card className="border-l-4 border-l-blue-500 hover:shadow-md transition-shadow">
@@ -340,10 +366,10 @@ export default function DashboardPage() {
                 {aqiData && aqiData.aqi <= 50
                   ? "Good"
                   : aqiData && aqiData.aqi <= 100
-                  ? "Moderate"
-                  : aqiData
-                  ? "Unhealthy"
-                  : "--"}
+                    ? "Moderate"
+                    : aqiData
+                      ? "Unhealthy"
+                      : "--"}
               </div>
               <p className="text-xs text-muted-foreground">
                 {aqiData ? `Updated at ${aqiData.time}` : "No active alerts"}
@@ -359,8 +385,8 @@ export default function DashboardPage() {
 
         {/* Chart + Allergen */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <AirQualityChart/>
-          <AllergenTracker />
+          <AirQualityChart />
+          <AllergenTracker pollenData={pollenData} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -23,7 +23,6 @@ export function LocationSelector({ location, setLocation }: LocationSelectorProp
       console.log("Fetched Data:", data)
 
       setLocation(locationInput) // ✅ Update parent state
-      alert(`AQI for ${data.city} is ${data.aqi}`)
     } catch (error) {
       console.error("Error fetching data:", error)
     }
@@ -48,10 +47,15 @@ export function LocationSelector({ location, setLocation }: LocationSelectorProp
               placeholder="Enter city or address"
             />
             <div className="flex gap-2">
-              <Button onClick={handleLocationUpdate} size="sm" className="flex-1">
+              <Button 
+                onClick={handleLocationUpdate} 
+                size="sm" 
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+              >
                 <Search className="h-4 w-4 mr-2" />
                 Update
               </Button>
+
               <Button variant="outline" size="sm">
                 <Navigation className="h-4 w-4" />
               </Button>

@@ -1,3 +1,4 @@
+//HEAD
 // "use client"
 
 // import { useState } from "react"
@@ -130,6 +131,8 @@
 //     </div>
 //   )
 // }
+"use client"
+//f5c9b33117f1bea4189b664836b2a6c88ccf29d8
 import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -207,6 +210,7 @@ function InteractiveMap({ activeLayer, onStationSelect }: MapProps) {
     }
     return variants[status as keyof typeof variants] || variants.good
   }
+// <<<<<<< HEAD
 
   const createCustomIcon = (color: string, iconType: 'station' | 'community') => {
     const size = iconType === 'station' ? 32 : 20
@@ -220,6 +224,107 @@ function InteractiveMap({ activeLayer, onStationSelect }: MapProps) {
     </svg>`
     
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`
+// =======
+  const createCustomIcon = (color: string, iconType: 'station' | 'community') => {
+    const size = iconType === 'station' ? 32 : 20
+
+    let iconPath: string
+
+    if (iconType === 'station') {
+      // Pre-calculate all coordinates to avoid template literal issues
+      const centerX = size / 2
+      const centerY = size / 2
+      const x1 = centerX - 6
+      const y1 = centerY - 4
+      const x2 = centerX
+      const y2 = centerY - 8
+      const x3 = centerX + 6
+      const y3 = centerY - 4
+      const x4 = centerX + 4
+      const y4 = centerY + 2
+      const x5 = centerX - 4
+      const y5 = centerY + 2
+
+      iconPath = <path d="M${x1},${y1} L${x2},${y2} L${x3},${y3} L${x4},${y4} L${x5},${y5} Z" fill="white" />
+    } else {
+      // Simple circles for community reports
+      const centerX = size / 2
+      const centerY = size / 2
+      const headX = centerX
+      const headY = centerY - 2
+      const bodyX = centerX
+      const bodyY = centerY + 3
+
+      iconPath = <circle cx="${headX}" cy="${headY}" r="3" fill="white"/><circle cx="${bodyX}" cy="${bodyY}" r="4" fill="white"/>
+    }
+
+    const svgString = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="${size / 2}" cy="${size / 2}" r="${(size / 2) - 2}" fill="${color}" stroke="white" stroke-width="2"/>
+    ${iconPath}
+  </svg>`
+
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString)
+  }
+
+  // Alternative: Even simpler approach with basic shapes
+  const createSimpleIcon = (color: string, iconType: 'station' | 'community') => {
+    const size = iconType === 'station' ? 32 : 20
+    const radius = (size / 2) - 2
+    const center = size / 2
+
+    let innerIcon = ''
+
+    if (iconType === 'station') {
+      // Simple triangle for wind/station
+      const topX = center
+      const topY = center - 4
+      const leftX = center - 4
+      const leftY = center + 2
+      const rightX = center + 4
+      const rightY = center + 2
+
+      innerIcon = <polygon points="${topX},${topY} ${leftX},${leftY} ${rightX},${rightY}" fill="white" />
+    } else {
+      // Simple dot for community
+      innerIcon = <circle cx="${center}" cy="${center}" r="4" fill="white" />
+    }
+
+    const svgString = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="${center}" cy="${center}" r="${radius}" fill="${color}" stroke="white" stroke-width="2"/>
+    ${innerIcon}
+  </svg>`
+
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString)
+  }
+
+  // Alternative simpler version if you're still having issues:
+  const createCustomIconSimple = (color: string, iconType: 'station' | 'community') => {
+    const size = iconType === 'station' ? 32 : 20
+
+    // Much simpler icons
+    const iconContent = iconType === 'station'
+      ? <text x="${size/2}" y="${size/2+2}" text-anchor="middle" fill="white" font-size="12">S</text>
+      : <text x="${size/2}" y="${size/2+2}" text-anchor="middle" fill="white" font-size="10">C</text>
+
+    const svgString = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="${size / 2}" cy="${size / 2}" r="${(size / 2) - 2}" fill="${color}" stroke="white" stroke-width="2"/>
+    ${iconContent}
+  </svg>`
+
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString)
+  }
+
+  // Even simpler alternative using basic shapes:
+  const createBasicIcon = (color: string, iconType: 'station' | 'community') => {
+    const size = iconType === 'station' ? 32 : 20
+
+    // Just colored circles with different sizes
+    const svgString = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="${size / 2}" cy="${size / 2}" r="${(size / 2) - 2}" fill="${color}" stroke="white" stroke-width="2"/>
+  </svg>`
+
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString)
+// >>>>>>> f5c9b33117f1bea4189b664836b2a6c88ccf29d8
   }
 
   useEffect(() => {
@@ -314,9 +419,9 @@ function InteractiveMap({ activeLayer, onStationSelect }: MapProps) {
     // Add community reports if active
     if (activeLayer === 'community') {
       communityReports.forEach(report => {
-        const color = report.severity === 'high' ? '#ef4444' : 
-                     report.severity === 'medium' ? '#f59e0b' : '#10b981'
-        
+        const color = report.severity === 'high' ? '#ef4444' :
+          report.severity === 'medium' ? '#f59e0b' : '#10b981'
+
         const icon = L.icon({
           iconUrl: createCustomIcon(color, 'community'),
           iconSize: [20, 20],
@@ -357,6 +462,173 @@ function InteractiveMap({ activeLayer, onStationSelect }: MapProps) {
     }
   }
 
+// <<<<<<< HEAD
+// =======
+  const createCustomIcon = (color: string, iconType: 'station' | 'community') => {
+    const size = iconType === 'station' ? 32 : 20
+    const iconPath = iconType === 'station'
+      ? `<path d="M${size / 2 - 6},${size / 2 - 4} L${size / 2},${size / 2 - 8} L${size / 2 + 6},${size / 2 - 4} L${size / 2 + 4},${size / 2 + 2} L${size / 2 - 4},${size / 2 + 2} Z" fill="white"/>`
+      : `<circle cx="${size / 2 - 3}" cy="${size / 2 - 2}" r="2" fill="white"/>
+       <circle cx="${size / 2 + 3}" cy="${size / 2 - 2}" r="2" fill="white"/>
+       <path d="M${size / 2 - 4},${size / 2 + 2} Q${size / 2},${size / 2 + 4} ${size / 2 + 4},${size / 2 + 2}" stroke="white" stroke-width="1" fill="none"/>`
+
+    const svgString = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2 - 2}" fill="${color}" stroke="white" stroke-width="2"/>
+      ${iconPath}
+    </svg>`
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`
+  }
+
+
+  useEffect(() => {
+    if (!mapRef.current) return
+
+    // Initialize Leaflet map
+    const L = (window as any).L
+    if (!L) {
+      // Load Leaflet if not already loaded
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css'
+      document.head.appendChild(link)
+
+      const script = document.createElement('script')
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js'
+      script.onload = () => initializeMap()
+      document.head.appendChild(script)
+    } else {
+      initializeMap()
+    }
+
+    function initializeMap() {
+      const L = (window as any).L
+
+      // ✅ If an old map exists, destroy it
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.off()
+        mapInstanceRef.current.remove()
+        mapInstanceRef.current = null
+      }
+
+      // ✅ Reset Leaflet internal ID on the container div
+      if (mapRef.current && (mapRef.current as any)._leaflet_id) {
+        delete (mapRef.current as any)._leaflet_id
+      }
+
+      // ✅ Now safely create a new map
+      const map = L.map(mapRef.current!).setView([37.7749, -122.4194], 12)
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+      }).addTo(map)
+
+      mapInstanceRef.current = map
+      updateMarkers()
+    }
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.off()
+        mapInstanceRef.current.remove()
+        mapInstanceRef.current = null
+      }
+      if (mapRef.current && (mapRef.current as any)._leaflet_id) {
+        delete (mapRef.current as any)._leaflet_id
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    updateMarkers()
+  }, [activeLayer])
+
+  const updateMarkers = () => {
+    const L = (window as any).L
+    if (!L || !mapInstanceRef.current) return
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => {
+      mapInstanceRef.current.removeLayer(marker)
+    })
+    markersRef.current = []
+
+    // Add monitoring station markers
+    monitoringStations.forEach(station => {
+      const icon = L.icon({
+        iconUrl: createCustomIcon(getAQIColor(station.aqi), 'station'),
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+        popupAnchor: [0, -16]
+      })
+
+      const marker = L.marker([station.lat, station.lng], { icon })
+        .bindPopup(`
+          <div class="p-2">
+            <h4 class="font-semibold text-sm">${station.name}</h4>
+            <div class="mt-1">
+              <span class="inline-block px-2 py-1 text-xs rounded ${getStatusBadge(station.status)}">
+                AQI ${station.aqi}
+              </span>
+            </div>
+            <p class="text-xs text-gray-600 mt-1">Click for detailed data</p>
+          </div>
+        `)
+        .on('click', () => {
+          setSelectedStation(station.id)
+          onStationSelect(station)
+        })
+        .addTo(mapInstanceRef.current)
+
+      markersRef.current.push(marker)
+    })
+
+    // Add community reports if active
+    if (activeLayer === 'community') {
+      communityReports.forEach(report => {
+        const color = report.severity === 'high' ? '#ef4444' :
+          report.severity === 'medium' ? '#f59e0b' : '#10b981'
+
+        const icon = L.icon({
+          iconUrl: createCustomIcon(color, 'community'),
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
+          popupAnchor: [0, -10]
+        })
+
+        const marker = L.marker([report.lat, report.lng], { icon })
+          .bindPopup(`
+            <div class="p-2">
+              <h4 class="font-semibold text-sm capitalize">${report.type} Report</h4>
+              <p class="text-xs text-gray-600">Severity: ${report.severity}</p>
+            </div>
+          `)
+          .addTo(mapInstanceRef.current)
+
+        markersRef.current.push(marker)
+      })
+    }
+
+    // Add AQI overlay regions if active
+    if (activeLayer === 'aqi') {
+      const goodZone = L.circle([37.7694, -122.4862], {
+        color: '#10b981',
+        fillColor: '#10b981',
+        fillOpacity: 0.1,
+        radius: 1000
+      }).addTo(mapInstanceRef.current)
+
+      const moderateZone = L.circle([37.7599, -122.4148], {
+        color: '#f59e0b',
+        fillColor: '#f59e0b',
+        fillOpacity: 0.1,
+        radius: 800
+      }).addTo(mapInstanceRef.current)
+
+      markersRef.current.push(goodZone, moderateZone)
+    }
+  }
+
+// >>>>>>> f5c9b33117f1bea4189b664836b2a6c88ccf29d8
   return (
     <div className="w-full h-full relative">
       <div ref={mapRef} className="w-full h-full rounded-lg" />
@@ -514,4 +786,5 @@ export default function AirQualityMapDemo() {
       </div>
     </div>
   )
+}
 }
