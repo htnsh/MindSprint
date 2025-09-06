@@ -1,3 +1,4 @@
+
 // "use client"
 
 // import { useState } from "react"
@@ -136,6 +137,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 
+
 import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -193,7 +195,7 @@ interface MapLegendProps {
   activeLayer: string
 }
 
-function InteractiveMap({ activeLayer, onStationSelect }: MapProps) {
+export function InteractiveMap({ activeLayer, onStationSelect }: MapProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
   const markersRef = useRef<any[]>([])
@@ -453,15 +455,15 @@ const createBasicIcon = (color: string, iconType: 'station' | 'community') => {
 
   const createCustomIcon = (color: string, iconType: 'station' | 'community') => {
     const size = iconType === 'station' ? 32 : 20
-    const iconPath = iconType === 'station' 
-      ? `<path d="M${size/2-6},${size/2-4} L${size/2},${size/2-8} L${size/2+6},${size/2-4} L${size/2+4},${size/2+2} L${size/2-4},${size/2+2} Z" fill="white"/>` 
-      : `<circle cx="${size/2-3}" cy="${size/2-2}" r="2" fill="white"/><circle cx="${size/2+3}" cy="${size/2-2}" r="2" fill="white"/><path d="M${size/2-4},${size/2+2} Q${size/2},${size/2+4} ${size/2+4},${size/2+2}" stroke="white" stroke-width="1" fill="none"/>`
-    
+    const iconPath = iconType === 'station'
+      ? `<path d="M${size / 2 - 6},${size / 2 - 4} L${size / 2},${size / 2 - 8} L${size / 2 + 6},${size / 2 - 4} L${size / 2 + 4},${size / 2 + 2} L${size / 2 - 4},${size / 2 + 2} Z" fill="white"/>`
+      : `<circle cx="${size / 2 - 3}" cy="${size / 2 - 2}" r="2" fill="white"/><circle cx="${size / 2 + 3}" cy="${size / 2 - 2}" r="2" fill="white"/><path d="M${size / 2 - 4},${size / 2 + 2} Q${size / 2},${size / 2 + 4} ${size / 2 + 4},${size / 2 + 2}" stroke="white" stroke-width="1" fill="none"/>`
+
     const svgString = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 2}" fill="${color}" stroke="white" stroke-width="2"/>
+      <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2 - 2}" fill="${color}" stroke="white" stroke-width="2"/>
       ${iconPath}
     </svg>`
-    
+
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`
   }
 
@@ -487,16 +489,24 @@ const createBasicIcon = (color: string, iconType: 'station' | 'community') => {
 
     function initializeMap() {
       const L = (window as any).L
+
+      // ✅ If an old map exists, destroy it
       if (mapInstanceRef.current) {
+        mapInstanceRef.current.off()
         mapInstanceRef.current.remove()
+        mapInstanceRef.current = null
       }
 
-      // Create map centered on San Francisco
-      const map = L.map(mapRef.current).setView([37.7749, -122.4194], 12)
+      // ✅ Reset Leaflet internal ID on the container div
+      if (mapRef.current && (mapRef.current as any)._leaflet_id) {
+        delete (mapRef.current as any)._leaflet_id
+      }
 
-      // Add OpenStreetMap tiles
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+      // ✅ Now safely create a new map
+      const map = L.map(mapRef.current!).setView([37.7749, -122.4194], 12)
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
       }).addTo(map)
 
       mapInstanceRef.current = map
@@ -505,7 +515,12 @@ const createBasicIcon = (color: string, iconType: 'station' | 'community') => {
 
     return () => {
       if (mapInstanceRef.current) {
+        mapInstanceRef.current.off()
         mapInstanceRef.current.remove()
+        mapInstanceRef.current = null
+      }
+      if (mapRef.current && (mapRef.current as any)._leaflet_id) {
+        delete (mapRef.current as any)._leaflet_id
       }
     }
   }, [])
@@ -557,9 +572,9 @@ const createBasicIcon = (color: string, iconType: 'station' | 'community') => {
     // Add community reports if active
     if (activeLayer === 'community') {
       communityReports.forEach(report => {
-        const color = report.severity === 'high' ? '#ef4444' : 
-                     report.severity === 'medium' ? '#f59e0b' : '#10b981'
-        
+        const color = report.severity === 'high' ? '#ef4444' :
+          report.severity === 'medium' ? '#f59e0b' : '#10b981'
+
         const icon = L.icon({
           iconUrl: createCustomIcon(color, 'community'),
           iconSize: [20, 20],
@@ -603,7 +618,7 @@ const createBasicIcon = (color: string, iconType: 'station' | 'community') => {
   return (
     <div className="w-full h-full relative">
       <div ref={mapRef} className="w-full h-full rounded-lg" />
-      
+
       {/* Loading message */}
       {!mapInstanceRef.current && (
         <div className="absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -617,7 +632,7 @@ const createBasicIcon = (color: string, iconType: 'station' | 'community') => {
   )
 }
 
-function MapControls({ activeLayer, onLayerChange }: MapControlsProps) {
+export function MapControls({ activeLayer, onLayerChange }: MapControlsProps) {
   const layers = [
     { id: "aqi", name: "Air Quality Index", icon: Wind, description: "Real-time AQI data" },
     { id: "pm25", name: "PM2.5 Levels", icon: Activity, description: "Fine particulate matter" },
@@ -655,7 +670,7 @@ function MapControls({ activeLayer, onLayerChange }: MapControlsProps) {
   )
 }
 
-function MapLegend({ activeLayer }: MapLegendProps) {
+export function MapLegend({ activeLayer }: MapLegendProps) {
   const legends = {
     aqi: [
       { range: "0-50", color: "#10b981", label: "Good", description: "Air quality is satisfactory" },
