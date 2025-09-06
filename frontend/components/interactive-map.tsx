@@ -135,12 +135,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+
 import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Users, Wind, Activity, Layers } from "lucide-react"
+
 
 
 // Type definitions at the very top
@@ -313,6 +315,155 @@ const createBasicIcon = (color: string, iconType: 'station' | 'community') => {
   
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString)
 }
+
+  useEffect(() => {
+    if (!mapRef.current) return
+
+    // Initialize Leaflet map
+    const L = (window as any).L
+    if (!L) {
+      // Load Leaflet if not already loaded
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css'
+      document.head.appendChild(link)
+
+      const script = document.createElement('script')
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js'
+      script.onload = () => initializeMap()
+      document.head.appendChild(script)
+    } else {
+      initializeMap()
+    }
+
+    function initializeMap() {
+      const L = (window as any).L
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove()
+      }
+
+      // Create map centered on San Francisco
+      const map = L.map(mapRef.current).setView([37.7749, -122.4194], 12)
+
+      // Add OpenStreetMap tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map)
+
+      mapInstanceRef.current = map
+      updateMarkers()
+    }
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove()
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    updateMarkers()
+  }, [activeLayer])
+
+  const updateMarkers = () => {
+    const L = (window as any).L
+    if (!L || !mapInstanceRef.current) return
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => {
+      mapInstanceRef.current.removeLayer(marker)
+    })
+    markersRef.current = []
+
+    // Add monitoring station markers
+    monitoringStations.forEach(station => {
+      const icon = L.icon({
+        iconUrl: createCustomIcon(getAQIColor(station.aqi), 'station'),
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+        popupAnchor: [0, -16]
+      })
+
+      const marker = L.marker([station.lat, station.lng], { icon })
+        .bindPopup(`
+          <div class="p-2">
+            <h4 class="font-semibold text-sm">${station.name}</h4>
+            <div class="mt-1">
+              <span class="inline-block px-2 py-1 text-xs rounded ${getStatusBadge(station.status)}">
+                AQI ${station.aqi}
+              </span>
+            </div>
+            <p class="text-xs text-gray-600 mt-1">Click for detailed data</p>
+          </div>
+        `)
+        .on('click', () => {
+          setSelectedStation(station.id)
+          onStationSelect(station)
+        })
+        .addTo(mapInstanceRef.current)
+
+      markersRef.current.push(marker)
+    })
+
+    // Add community reports if active
+    if (activeLayer === 'community') {
+      communityReports.forEach(report => {
+        const color = report.severity === 'high' ? '#ef4444' : 
+                     report.severity === 'medium' ? '#f59e0b' : '#10b981'
+        
+        const icon = L.icon({
+          iconUrl: createCustomIcon(color, 'community'),
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
+          popupAnchor: [0, -10]
+        })
+
+        const marker = L.marker([report.lat, report.lng], { icon })
+          .bindPopup(`
+            <div class="p-2">
+              <h4 class="font-semibold text-sm capitalize">${report.type} Report</h4>
+              <p class="text-xs text-gray-600">Severity: ${report.severity}</p>
+            </div>
+          `)
+          .addTo(mapInstanceRef.current)
+
+        markersRef.current.push(marker)
+      })
+    }
+
+    // Add AQI overlay regions if active
+    if (activeLayer === 'aqi') {
+      const goodZone = L.circle([37.7694, -122.4862], {
+        color: '#10b981',
+        fillColor: '#10b981',
+        fillOpacity: 0.1,
+        radius: 1000
+      }).addTo(mapInstanceRef.current)
+
+      const moderateZone = L.circle([37.7599, -122.4148], {
+        color: '#f59e0b',
+        fillColor: '#f59e0b',
+        fillOpacity: 0.1,
+        radius: 800
+      }).addTo(mapInstanceRef.current)
+
+      markersRef.current.push(goodZone, moderateZone)
+    }
+  }
+
+  const createCustomIcon = (color: string, iconType: 'station' | 'community') => {
+    const size = iconType === 'station' ? 32 : 20
+    const iconPath = iconType === 'station' 
+      ? `<path d="M${size/2-6},${size/2-4} L${size/2},${size/2-8} L${size/2+6},${size/2-4} L${size/2+4},${size/2+2} L${size/2-4},${size/2+2} Z" fill="white"/>` 
+      : `<circle cx="${size/2-3}" cy="${size/2-2}" r="2" fill="white"/><circle cx="${size/2+3}" cy="${size/2-2}" r="2" fill="white"/><path d="M${size/2-4},${size/2+2} Q${size/2},${size/2+4} ${size/2+4},${size/2+2}" stroke="white" stroke-width="1" fill="none"/>`
+    
+    const svgString = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 2}" fill="${color}" stroke="white" stroke-width="2"/>
+      ${iconPath}
+    </svg>`
+    
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`
+  }
 
   useEffect(() => {
     if (!mapRef.current) return

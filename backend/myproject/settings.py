@@ -27,6 +27,19 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load .env file from BASE_DIR
+env_path = BASE_DIR / ".env"
+load_dotenv(dotenv_path=env_path)
+
+WAQI_API_KEY = os.getenv("WAQI_API_TOKEN")
+
+
 
 # Application definition
 
@@ -42,6 +55,11 @@ INSTALLED_APPS = [
     'corsheaders',
     'authentication',
     'dashboard',
+    "django_crontab",
+]
+
+CRONJOBS = [
+    ('0 */3 * * *', 'yourapp.cron.fetch_aqi_data')  # every 3 hours
 ]
 
 MIDDLEWARE = [
