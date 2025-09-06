@@ -119,12 +119,8 @@ DATABASES = {
     }
 }
 
-
-
-
-
 # MongoDB Configuration
-MONGODB_URI = 'mongodb+srv://atifmalik22092005_db_user:uwD9XQwm2lM39xmC@cluster0.0vkusga.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+MONGODB_URI = 'mongodb+srv://Hetansh_Panchal:id4vxGPKAEIDlyVE@hetansh.pcfax7n.mongodb.net/'
 MONGODB_DATABASE = 'BreatheBetter'
 
 
