@@ -9,6 +9,9 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+import sys, os
+sys.modules['cgi'] = __import__('cgi')
+
 
 from pathlib import Path
 
@@ -97,6 +100,18 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'djongo',
+#         'NAME': 'breathebetter',
+#         'CLIENT': {
+#             'host': os.getenv("MONGO_URI"),
+#             'ssl': True,
+#             'tlsAllowInvalidCertificates': False,
+#         }
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -104,8 +119,12 @@ DATABASES = {
     }
 }
 
+
+
+
+
 # MongoDB Configuration
-MONGODB_URI = 'mongodb+srv://snehapankhi19_db_user:xR3eLexzQGuicBHq@breathebetter.h6p6fei.mongodb.net/'
+MONGODB_URI = 'mongodb+srv://atifmalik22092005_db_user:uwD9XQwm2lM39xmC@cluster0.0vkusga.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 MONGODB_DATABASE = 'BreatheBetter'
 
 
@@ -205,3 +224,17 @@ ALLOWED_HOSTS = ['*']
 
 # Using Django's built-in User model
 # AUTH_USER_MODEL = 'authentication.User'
+import mongoengine
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+MONGO_URI = os.getenv("MONGO_URI")
+
+mongoengine.connect(
+    db="BreatheBetter",
+    host=MONGO_URI,
+    tls=True,
+    tlsAllowInvalidCertificates=False
+)

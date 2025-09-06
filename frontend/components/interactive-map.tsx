@@ -154,7 +154,9 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
     markersRef.current = []
 
     // Add new station markers
+    // Add new station markers
     stations.forEach((station) => {
+
       const icon = L.icon({
         iconUrl: createCustomIcon(getAQIColor(station.aqi), "station"),
         iconSize: [32, 32],
