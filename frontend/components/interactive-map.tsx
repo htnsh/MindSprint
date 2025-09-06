@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -42,7 +41,7 @@ interface CommunityReport {
 const WAQI_API_TOKEN = "fec89e5d35967b3907e0bdac5b9537ce3a8b9d2c"
 
 // Interactive Map Component
-export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
+function InteractiveMap({ activeLayer, stations, onStationSelect }: {
   activeLayer: string
   stations: Station[]
   onStationSelect: (station: Station) => void
@@ -154,9 +153,7 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
     markersRef.current = []
 
     // Add new station markers
-    // Add new station markers
     stations.forEach((station) => {
-
       const icon = L.icon({
         iconUrl: createCustomIcon(getAQIColor(station.aqi), "station"),
         iconSize: [32, 32],
@@ -243,7 +240,7 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
 }
 
 // Location Search Component
-export function LocationSearch({ onLocationSearch, loading }: {
+function LocationSearch({ onLocationSearch, loading }: {
   onLocationSearch: (location: string) => void
   loading: boolean
 }) {
@@ -310,7 +307,7 @@ export function LocationSearch({ onLocationSearch, loading }: {
 }
 
 // Map Controls Component
-export function MapControls({ activeLayer, onLayerChange, onRefresh, onGetMyLocation, loading }: {
+function MapControls({ activeLayer, onLayerChange, onRefresh, onGetMyLocation, loading }: {
   activeLayer: string
   onLayerChange: (layer: string) => void
   onRefresh: () => void
@@ -382,7 +379,7 @@ export function MapControls({ activeLayer, onLayerChange, onRefresh, onGetMyLoca
 }
 
 // Map Legend Component
-export function MapLegend({ activeLayer }: { activeLayer: string }) {
+function MapLegend({ activeLayer }: { activeLayer: string }) {
   const legends = {
     aqi: [
       { range: "0-50", color: "#10b981", label: "Good", description: "Air quality is satisfactory" },
