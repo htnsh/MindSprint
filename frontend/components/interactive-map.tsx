@@ -194,7 +194,14 @@ const createCustomIcon = (color: string) => {
 }
 
 // Interactive Map
-function InteractiveMap({ stations, onStationSelect }: { stations: Station[]; onStationSelect: (s: Station) => void }) {
+// Interactive Map
+function InteractiveMap({
+  stations = [],
+  onStationSelect,
+}: {
+  stations?: Station[]
+  onStationSelect: (s: Station) => void
+}) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
   const markersRef = useRef<any[]>([])
@@ -239,8 +246,13 @@ function InteractiveMap({ stations, onStationSelect }: { stations: Station[]; on
   const updateMarkers = () => {
     const L = (window as any).L
     if (!L || !mapInstanceRef.current) return
+
+    // Clear existing markers
     markersRef.current.forEach((m) => mapInstanceRef.current.removeLayer(m))
     markersRef.current = []
+
+    // ✅ Guard against undefined or empty array
+    if (!stations || stations.length === 0) return
 
     stations.forEach((s) => {
       const icon = L.icon({
@@ -248,12 +260,15 @@ function InteractiveMap({ stations, onStationSelect }: { stations: Station[]; on
         iconSize: [32, 32],
         iconAnchor: [16, 16],
       })
+
       const marker = L.marker([s.lat, s.lng], { icon })
         .bindPopup(`<strong>${s.name}</strong><br/>AQI: ${s.aqi}`)
         .on("click", () => onStationSelect(s))
         .addTo(mapInstanceRef.current)
+
       markersRef.current.push(marker)
     })
+
     if (stations.length === 1) {
       mapInstanceRef.current.setView([stations[0].lat, stations[0].lng], 11)
     }
