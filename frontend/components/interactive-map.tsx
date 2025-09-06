@@ -98,27 +98,15 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
     if (!mapRef.current) return
 
     const L = (window as any).L
-    if (!L) {
-      const link = document.createElement("link")
-      link.rel = "stylesheet"
-      link.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
-      document.head.appendChild(link)
 
-      const script = document.createElement("script")
-      script.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"
-      script.onload = () => initializeMap()
-      document.head.appendChild(script)
-    } else {
-      initializeMap()
-    }
-
-    function initializeMap() {
+    const initializeMap = () => {
       const L = (window as any).L
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove()
+        mapInstanceRef.current = null // important!
       }
 
-      // Default to Delhi, India coordinates
+      // Default to Delhi, India
       const map = L.map(mapRef.current).setView([28.6139, 77.2090], 10)
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -129,12 +117,30 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
       updateMarkers()
     }
 
+    if (!L) {
+      // Load Leaflet CSS
+      const link = document.createElement("link")
+      link.rel = "stylesheet"
+      link.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
+      document.head.appendChild(link)
+
+      // Load Leaflet JS
+      const script = document.createElement("script")
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"
+      script.onload = initializeMap
+      document.head.appendChild(script)
+    } else {
+      initializeMap()
+    }
+
     return () => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove()
+        mapInstanceRef.current = null
       }
     }
   }, [])
+
 
   useEffect(() => {
     updateMarkers()
