@@ -14,7 +14,6 @@ export function MapControls({ activeLayer, onLayerChange }: MapControlsProps) {
     { id: "aqi", name: "Air Quality Index", icon: Wind, description: "Real-time AQI data" },
     { id: "pm25", name: "PM2.5 Levels", icon: Activity, description: "Fine particulate matter" },
     { id: "pollen", name: "Pollen Forecast", icon: Activity, description: "Allergen predictions" },
-    { id: "community", name: "Community Reports", icon: Users, description: "User-submitted data" },
   ]
 
   return (

@@ -9,22 +9,36 @@ import { Users, Wind, Activity, Layers, RefreshCw, MapPin, AlertCircle } from "l
 
 // Types
 interface Station {
-  id: number
+
+  id: string
   name: string
   lat: number
   lng: number
   aqi: number
   status: string
   city?: string
-  pollutants?: {
-    pm25?: number
-    pm10?: number
-    o3?: number
-    no2?: number
-    so2?: number
-    co?: number
-  }
-  time?: string
+  pm25?: number
+  pm10?: number
+  o3?: number
+  no2?: number
+  so2?: number
+  co?: number
+  last_updated?: string
+}
+
+interface PollenStation {
+  id: string
+  name: string
+  lat: number
+  lng: number
+  tree_pollen: number
+  grass_pollen: number
+  weed_pollen: number
+  tree_risk: string
+  grass_risk: string
+  weed_risk: string
+  last_updated: string
+  city?: string
 }
 
 interface CommunityReport {
@@ -38,20 +52,22 @@ interface CommunityReport {
 }
 
 // Interactive Map Component
-export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
+export function InteractiveMap({ 
+  activeLayer, 
+  mapData, 
+  onStationSelect
+}: {
   activeLayer: string
-  stations: Station[]
-  onStationSelect: (station: Station) => void
+  mapData: any
+  onStationSelect: (station: any) => void
 }) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
   const markersRef = useRef<any[]>([])
 
-  const communityReports: CommunityReport[] = [
-    { id: 1, lat: 28.6139, lng: 77.2090, type: "smoke", severity: "high", timestamp: new Date().toISOString() },
-    { id: 2, lat: 19.0760, lng: 72.8777, type: "dust", severity: "medium", timestamp: new Date().toISOString() },
-    { id: 3, lat: 12.9716, lng: 77.5946, type: "pollen", severity: "low", timestamp: new Date().toISOString() },
-  ]
+  // Get data from props
+  const stations = mapData?.aqi_stations || []
+  const communityReports = mapData?.community_reports || []
 
   const getAQIColor = (aqi: number) => {
     if (aqi <= 50) return "#10b981"
@@ -60,6 +76,21 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
     if (aqi <= 200) return "#ef4444"
     if (aqi <= 300) return "#7c2d12"
     return "#4c1d95"
+  }
+
+  const getPollenColor = (riskLevel: string) => {
+    switch (riskLevel.toLowerCase()) {
+      case 'low':
+        return "#10b981" // Green
+      case 'medium':
+        return "#f59e0b" // Yellow
+      case 'high':
+        return "#f97316" // Orange
+      case 'very high':
+        return "#ef4444" // Red
+      default:
+        return "#10b981" // Default to green for low
+    }
   }
 
   const getStatusBadge = (status: string) => {
@@ -74,11 +105,13 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
     return variants[status as keyof typeof variants] || variants.moderate
   }
 
-  const createCustomIcon = (color: string, iconType: "station" | "community") => {
-    const size = iconType === "station" ? 32 : 20
+  const createCustomIcon = (color: string, iconType: "station" | "community" | "pollen") => {
+    const size = iconType === "station" ? 32 : iconType === "pollen" ? 28 : 20
     const iconPath =
       iconType === "station"
         ? `<path d="M${size / 2 - 6},${size / 2 - 4} L${size / 2},${size / 2 - 8} L${size / 2 + 6},${size / 2 - 4} L${size / 2 + 4},${size / 2 + 2} L${size / 2 - 4},${size / 2 + 2} Z" fill="white"/>`
+        : iconType === "pollen"
+        ? `<circle cx="${size / 2 - 4}" cy="${size / 2 - 2}" r="2" fill="white"/><circle cx="${size / 2 + 4}" cy="${size / 2 - 2}" r="2" fill="white"/><circle cx="${size / 2}" cy="${size / 2 + 2}" r="2" fill="white"/>`
         : `<circle cx="${size / 2 - 3}" cy="${size / 2 - 2}" r="2" fill="white"/><circle cx="${size / 2 + 3
         }" cy="${size / 2 - 2}" r="2" fill="white"/><path d="M${size / 2 - 4},${size / 2 + 2} Q${size / 2
         },${size / 2 + 4} ${size / 2 + 4},${size / 2 + 2}" stroke="white" stroke-width="1" fill="none"/>`
@@ -141,7 +174,7 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
 
   useEffect(() => {
     updateMarkers()
-  }, [activeLayer, stations])
+  }, [activeLayer, mapData])
 
   const updateMarkers = () => {
     const L = (window as any).L
@@ -153,80 +186,102 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
     })
     markersRef.current = []
 
-    // Ensure stations is always an array
-    const safeStations = stations ?? []
+    // Add AQI station markers (show for aqi and pm25 layers)
+    if (mapData?.aqi_stations && (activeLayer === 'aqi' || activeLayer === 'pm25')) {
+      mapData.aqi_stations.forEach((station: any) => {
+        const icon = L.icon({
+          iconUrl: createCustomIcon(getAQIColor(station.aqi), "station"),
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+          popupAnchor: [0, -16],
+        })
 
-    // Add new station markers
-    safeStations.forEach((station) => {
-      const icon = L.icon({
-        iconUrl: createCustomIcon(getAQIColor(station.aqi), "station"),
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
-        popupAnchor: [0, -16],
-      })
+        const pollutantInfo = [
+          station.pm25 && `<div class="text-xs"><strong>PM2.5:</strong> ${station.pm25}</div>`,
+          station.pm10 && `<div class="text-xs"><strong>PM10:</strong> ${station.pm10}</div>`,
+          station.o3 && `<div class="text-xs"><strong>O3:</strong> ${station.o3}</div>`,
+          station.no2 && `<div class="text-xs"><strong>NO2:</strong> ${station.no2}</div>`,
+          station.so2 && `<div class="text-xs"><strong>SO2:</strong> ${station.so2}</div>`,
+          station.co && `<div class="text-xs"><strong>CO:</strong> ${station.co}</div>`
+        ].filter(Boolean).join('')
 
-      const pollutantInfo = station.pollutants
-        ? Object.entries(station.pollutants)
-          .filter(([_, value]) => value !== undefined)
-          .map(([key, value]) => `<div class="text-xs"><strong>${key.toUpperCase()}:</strong> ${value}</div>`)
-          .join('')
-        : ''
-
-      const marker = L.marker([station.lat, station.lng], { icon })
-        .bindPopup(`
-        <div class="p-3 min-w-[200px]">
-          <h4 class="font-semibold text-sm mb-2">${station.name}</h4>
-          <div class="mb-2">
-            <span class="inline-block px-2 py-1 text-xs rounded ${getStatusBadge(station.status)}">
-              AQI ${station.aqi}
-            </span>
+        const marker = L.marker([station.lat, station.lng], { icon })
+          .bindPopup(`
+          <div class="p-3 min-w-[200px]">
+            <h4 class="font-semibold text-sm mb-2">${station.name}</h4>
+            <div class="mb-2">
+              <span class="inline-block px-2 py-1 text-xs rounded ${getStatusBadge(station.status)}">
+                AQI ${station.aqi}
+              </span>
+            </div>
+            ${pollutantInfo}
+            ${station.last_updated ? `<div class="text-xs text-gray-500 mt-2">Updated: ${new Date(station.last_updated).toLocaleString()}</div>` : ''}
           </div>
-          ${pollutantInfo}
-          ${station.time ? `<div class="text-xs text-gray-500 mt-2">Updated: ${new Date(station.time).toLocaleString()}</div>` : ''}
-        </div>
-      `)
-        .on("click", () => onStationSelect(station))
-        .addTo(mapInstanceRef.current)
+        `)
+          .on("click", () => onStationSelect(station))
+          .addTo(mapInstanceRef.current)
 
-      markersRef.current.push(marker)
-    })
+        markersRef.current.push(marker)
+      })
+    }
 
-    // Center map on stations
-    if (safeStations.length > 0) {
-      if (safeStations.length === 1) {
-        mapInstanceRef.current.setView([safeStations[0].lat, safeStations[0].lng], 12)
+    // Add Pollen station markers (show only for pollen layer)
+    if (mapData?.pollen_stations && activeLayer === 'pollen') {
+      mapData.pollen_stations.forEach((station: any) => {
+        // Get the highest risk level to determine color (same logic as dashboard)
+        const pollenTypes = [
+          { name: "Tree", count: station.tree_pollen, risk: station.tree_risk },
+          { name: "Grass", count: station.grass_pollen, risk: station.grass_risk },
+          { name: "Weed", count: station.weed_pollen, risk: station.weed_risk },
+        ]
+        const dominant = pollenTypes.reduce((max, p) => (p.count > max.count ? p : max), pollenTypes[0])
+        const pollenColor = getPollenColor(dominant.risk)
+        
+        const icon = L.icon({
+          iconUrl: createCustomIcon(pollenColor, "pollen"),
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+          popupAnchor: [0, -14],
+        })
+
+        // Use the dominant risk level (same as dashboard logic)
+        const overallLevel = dominant.risk
+        
+        const marker = L.marker([station.lat, station.lng], { icon })
+          .bindPopup(`
+          <div class="p-3 min-w-[200px]">
+            <h4 class="font-semibold text-sm mb-2">${station.name}</h4>
+            <div class="mb-2">
+              <span class="inline-block px-2 py-1 text-xs rounded" style="background-color: ${pollenColor}20; color: ${pollenColor}; border: 1px solid ${pollenColor}40;">
+                ${dominant.name} pollen: ${dominant.count} grains/m³ (${overallLevel})
+              </span>
+            </div>
+            <div class="mb-2 space-y-1">
+              <div class="text-xs"><strong>Tree Pollen:</strong> ${station.tree_pollen} (${station.tree_risk})</div>
+              <div class="text-xs"><strong>Grass Pollen:</strong> ${station.grass_pollen} (${station.grass_risk})</div>
+              <div class="text-xs"><strong>Weed Pollen:</strong> ${station.weed_pollen} (${station.weed_risk})</div>
+            </div>
+            ${station.last_updated ? `<div class="text-xs text-gray-500 mt-2">Updated: ${new Date(station.last_updated).toLocaleString()}</div>` : ''}
+          </div>
+        `)
+          .on("click", () => onStationSelect(station))
+          .addTo(mapInstanceRef.current)
+
+        markersRef.current.push(marker)
+      })
+    }
+
+    // Center map on visible stations
+    if (markersRef.current.length > 0) {
+      if (markersRef.current.length === 1) {
+        const marker = markersRef.current[0]
+        mapInstanceRef.current.setView([marker.getLatLng().lat, marker.getLatLng().lng], 12)
       } else {
         const group = new L.featureGroup(markersRef.current)
         mapInstanceRef.current.fitBounds(group.getBounds().pad(0.1))
       }
     }
 
-    // Add community reports safely
-    const safeCommunityReports = activeLayer === "community" ? communityReports ?? [] : []
-
-    safeCommunityReports.forEach((report) => {
-      const color =
-        report.severity === "high" ? "#ef4444" : report.severity === "medium" ? "#f59e0b" : "#10b981"
-
-      const icon = L.icon({
-        iconUrl: createCustomIcon(color, "community"),
-        iconSize: [20, 20],
-        iconAnchor: [10, 10],
-        popupAnchor: [0, -10],
-      })
-
-      const marker = L.marker([report.lat, report.lng], { icon })
-        .bindPopup(`
-        <div class="p-2">
-          <h4 class="font-semibold text-sm capitalize">${report.type} Report</h4>
-          <p class="text-xs text-gray-600">Severity: ${report.severity}</p>
-          ${report.description ? `<p class="text-xs mt-1">${report.description}</p>` : ''}
-        </div>
-      `)
-        .addTo(mapInstanceRef.current)
-
-      markersRef.current.push(marker)
-    })
   }
 
   return (
@@ -549,7 +604,7 @@ export default function AirQualityApp() {
 
       // Method 1: Try direct API call with jsonp (may work in some cases)
       try {
-        const response = await fetch(`https://api.waqi.info/feed/${encodeURIComponent(location)}/?token=${WAQI_API_TOKEN}`, {
+        const response = await fetch(`https://api.waqi.info/feed/${encodeURIComponent(location)}/?token=demo`, {
           method: 'GET',
           mode: 'cors',
         })
@@ -563,7 +618,7 @@ export default function AirQualityApp() {
       // Method 2: Try coordinate-based search if location search fails
       if (!data || data.status !== "ok") {
         try {
-          const response = await fetch(`https://api.waqi.info/feed/geo:${coords.lat};${coords.lng}/?token=${WAQI_API_TOKEN}`, {
+          const response = await fetch(`https://api.waqi.info/feed/geo:${coords.lat};${coords.lng}/?token=demo`, {
             method: 'GET',
             mode: 'cors',
           })
@@ -579,7 +634,7 @@ export default function AirQualityApp() {
       if (!data || data.status !== "ok") {
         try {
           const proxyUrl = 'https://corsproxy.io/?'
-          const targetUrl = `https://api.waqi.info/feed/${encodeURIComponent(location)}/?token=${WAQI_API_TOKEN}`
+          const targetUrl = `https://api.waqi.info/feed/${encodeURIComponent(location)}/?token=demo`
 
           const response = await fetch(`${proxyUrl}${encodeURIComponent(targetUrl)}`)
           if (response.ok) {
@@ -594,22 +649,20 @@ export default function AirQualityApp() {
         const stationData = data.data
 
         const station: Station = {
-          id: stationData.idx || Date.now(),
+          id: stationData.idx?.toString() || Date.now().toString(),
           name: stationData.city?.name || location,
           lat: stationData.city?.geo?.[0] || coords.lat,
           lng: stationData.city?.geo?.[1] || coords.lng,
           aqi: stationData.aqi || 0,
           status: getAQIStatusFromValue(stationData.aqi || 0),
           city: stationData.city?.name || location,
-          pollutants: {
-            pm25: stationData.iaqi?.pm25?.v,
-            pm10: stationData.iaqi?.pm10?.v,
-            o3: stationData.iaqi?.o3?.v,
-            no2: stationData.iaqi?.no2?.v,
-            so2: stationData.iaqi?.so2?.v,
-            co: stationData.iaqi?.co?.v,
-          },
-          time: stationData.time?.s
+          pm25: stationData.iaqi?.pm25?.v,
+          pm10: stationData.iaqi?.pm10?.v,
+          o3: stationData.iaqi?.o3?.v,
+          no2: stationData.iaqi?.no2?.v,
+          so2: stationData.iaqi?.so2?.v,
+          co: stationData.iaqi?.co?.v,
+          last_updated: stationData.time?.s
         }
 
         setStations([station])
@@ -626,22 +679,20 @@ export default function AirQualityApp() {
       console.log(`Creating demo station for ${location} at:`, coords)
 
       const demoStation: Station = {
-        id: Date.now(),
+        id: Date.now().toString(),
         name: `${location} Monitoring Station`,
         lat: coords.lat,
         lng: coords.lng,
         aqi: Math.floor(Math.random() * 180) + 20,
         status: "moderate",
         city: location,
-        pollutants: {
-          pm25: Math.floor(Math.random() * 60) + 15,
-          pm10: Math.floor(Math.random() * 90) + 25,
-          o3: Math.floor(Math.random() * 120) + 30,
-          no2: Math.floor(Math.random() * 80) + 20,
-          so2: Math.floor(Math.random() * 50) + 5,
-          co: Math.floor(Math.random() * 15) + 2,
-        },
-        time: new Date().toISOString()
+        pm25: Math.floor(Math.random() * 60) + 15,
+        pm10: Math.floor(Math.random() * 90) + 25,
+        o3: Math.floor(Math.random() * 120) + 30,
+        no2: Math.floor(Math.random() * 80) + 20,
+        so2: Math.floor(Math.random() * 50) + 5,
+        co: Math.floor(Math.random() * 15) + 2,
+        last_updated: new Date().toISOString()
       }
       demoStation.status = getAQIStatusFromValue(demoStation.aqi)
 
@@ -673,22 +724,20 @@ export default function AirQualityApp() {
         const lngOffset = (Math.random() - 0.5) * 0.2
 
         const station: Station = {
-          id: Date.now() + i,
+          id: (Date.now() + i).toString(),
           name: `${location} Station ${i + 1}`,
           lat: coords.lat + latOffset,
           lng: coords.lng + lngOffset,
           aqi: Math.floor(Math.random() * 200) + 20,
           status: "moderate",
           city: location,
-          pollutants: {
-            pm25: Math.floor(Math.random() * 80) + 10,
-            pm10: Math.floor(Math.random() * 120) + 20,
-            o3: Math.floor(Math.random() * 140) + 30,
-            no2: Math.floor(Math.random() * 90) + 15,
-            so2: Math.floor(Math.random() * 60) + 5,
-            co: Math.floor(Math.random() * 20) + 1,
-          },
-          time: new Date(Date.now() - Math.random() * 3600000).toISOString()
+          pm25: Math.floor(Math.random() * 80) + 10,
+          pm10: Math.floor(Math.random() * 120) + 20,
+          o3: Math.floor(Math.random() * 140) + 30,
+          no2: Math.floor(Math.random() * 90) + 15,
+          so2: Math.floor(Math.random() * 60) + 5,
+          co: Math.floor(Math.random() * 20) + 1,
+          last_updated: new Date(Date.now() - Math.random() * 3600000).toISOString()
         }
         station.status = getAQIStatusFromValue(station.aqi)
         nearbyStations.push(station)
@@ -734,22 +783,20 @@ export default function AirQualityApp() {
 
             // Create a station at user's location
             const station: Station = {
-              id: Date.now(),
+              id: Date.now().toString(),
               name: `${cityName} (Your Location)`,
               lat: latitude,
               lng: longitude,
               aqi: Math.floor(Math.random() * 150) + 25,
               status: "moderate",
               city: cityName,
-              pollutants: {
-                pm25: Math.floor(Math.random() * 50) + 15,
-                pm10: Math.floor(Math.random() * 70) + 20,
-                o3: Math.floor(Math.random() * 100) + 30,
-                no2: Math.floor(Math.random() * 60) + 15,
-                so2: Math.floor(Math.random() * 40) + 5,
-                co: Math.floor(Math.random() * 15) + 2,
-              },
-              time: new Date().toISOString()
+              pm25: Math.floor(Math.random() * 50) + 15,
+              pm10: Math.floor(Math.random() * 70) + 20,
+              o3: Math.floor(Math.random() * 100) + 30,
+              no2: Math.floor(Math.random() * 60) + 15,
+              so2: Math.floor(Math.random() * 40) + 5,
+              co: Math.floor(Math.random() * 15) + 2,
+              last_updated: new Date().toISOString()
             }
             station.status = getAQIStatusFromValue(station.aqi)
 
@@ -760,18 +807,16 @@ export default function AirQualityApp() {
             console.error("Error getting location details:", err)
             // Fallback to coordinates only
             const station: Station = {
-              id: Date.now(),
+              id: Date.now().toString(),
               name: "Your Location",
               lat: latitude,
               lng: longitude,
               aqi: Math.floor(Math.random() * 150) + 25,
               status: "moderate",
               city: "Your Location",
-              pollutants: {
-                pm25: Math.floor(Math.random() * 50) + 15,
-                pm10: Math.floor(Math.random() * 70) + 20,
-              },
-              time: new Date().toISOString()
+              pm25: Math.floor(Math.random() * 50) + 15,
+              pm10: Math.floor(Math.random() * 70) + 20,
+              last_updated: new Date().toISOString()
             }
             station.status = getAQIStatusFromValue(station.aqi)
             setStations([station])
@@ -798,11 +843,7 @@ export default function AirQualityApp() {
   return (
     <div className="w-full h-screen flex gap-4 p-4 bg-gray-50">
       <div className="flex-1 bg-white rounded-lg shadow-sm overflow-hidden">
-        <InteractiveMap
-          activeLayer={activeLayer}
-          stations={stations}
-          onStationSelect={handleStationSelect}
-        />
+        <div ref={mapRef} className="w-full h-full" />
       </div>
 
       <div className="w-80 space-y-4 overflow-y-auto">
@@ -846,22 +887,50 @@ export default function AirQualityApp() {
                     AQI {selectedStation.aqi}
                   </Badge>
                 </div>
-                {selectedStation.pollutants && (
+                {(selectedStation.pm25 || selectedStation.pm10 || selectedStation.o3 || selectedStation.no2 || selectedStation.so2 || selectedStation.co) && (
                   <div className="space-y-1">
                     <p className="text-sm font-medium">Pollutant Levels:</p>
-                    {Object.entries(selectedStation.pollutants)
-                      .filter(([_, value]) => value !== undefined)
-                      .map(([key, value]) => (
-                        <div key={key} className="flex justify-between text-xs">
-                          <span>{key.toUpperCase()}:</span>
-                          <span>{value}</span>
-                        </div>
-                      ))}
+                    {selectedStation.pm25 && (
+                      <div className="flex justify-between text-xs">
+                        <span>PM2.5:</span>
+                        <span>{selectedStation.pm25}</span>
+                      </div>
+                    )}
+                    {selectedStation.pm10 && (
+                      <div className="flex justify-between text-xs">
+                        <span>PM10:</span>
+                        <span>{selectedStation.pm10}</span>
+                      </div>
+                    )}
+                    {selectedStation.o3 && (
+                      <div className="flex justify-between text-xs">
+                        <span>O3:</span>
+                        <span>{selectedStation.o3}</span>
+                      </div>
+                    )}
+                    {selectedStation.no2 && (
+                      <div className="flex justify-between text-xs">
+                        <span>NO2:</span>
+                        <span>{selectedStation.no2}</span>
+                      </div>
+                    )}
+                    {selectedStation.so2 && (
+                      <div className="flex justify-between text-xs">
+                        <span>SO2:</span>
+                        <span>{selectedStation.so2}</span>
+                      </div>
+                    )}
+                    {selectedStation.co && (
+                      <div className="flex justify-between text-xs">
+                        <span>CO:</span>
+                        <span>{selectedStation.co}</span>
+                      </div>
+                    )}
                   </div>
                 )}
-                {selectedStation.time && (
+                {selectedStation.last_updated && (
                   <p className="text-xs text-gray-500">
-                    Last updated: {new Date(selectedStation.time).toLocaleString()}
+                    Last updated: {new Date(selectedStation.last_updated).toLocaleString()}
                   </p>
                 )}
               </div>

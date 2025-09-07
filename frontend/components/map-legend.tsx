@@ -28,15 +28,10 @@ export function MapLegend({ activeLayer }: MapLegendProps) {
       { range: "55+", color: "#ef4444", label: "Unhealthy", description: "Health concerns for everyone" },
     ],
     pollen: [
-      { range: "Low", color: "#10b981", label: "0-2.4", description: "Minimal symptoms" },
-      { range: "Medium", color: "#f59e0b", label: "2.5-4.8", description: "Mild symptoms possible" },
-      { range: "High", color: "#f97316", label: "4.9-7.2", description: "Moderate symptoms" },
-      { range: "Very High", color: "#ef4444", label: "7.3+", description: "Severe symptoms likely" },
-    ],
-    community: [
-      { range: "Smoke", color: "#6b7280", label: "Smoke Reports", description: "User-reported smoke" },
-      { range: "Dust", color: "#a3a3a3", label: "Dust Reports", description: "User-reported dust" },
-      { range: "Odor", color: "#8b5cf6", label: "Odor Reports", description: "User-reported odors" },
+      { range: "Low", color: "#10b981", label: "Low", description: "Minimal symptoms" },
+      { range: "Medium", color: "#f59e0b", label: "Medium", description: "Mild symptoms possible" },
+      { range: "High", color: "#f97316", label: "High", description: "Moderate symptoms" },
+      { range: "Very High", color: "#ef4444", label: "Very High", description: "Severe symptoms likely" },
     ],
   }
 
@@ -49,8 +44,7 @@ export function MapLegend({ activeLayer }: MapLegendProps) {
         <CardDescription>
           {activeLayer === "aqi" && "Air Quality Index ranges"}
           {activeLayer === "pm25" && "PM2.5 concentration (μg/m³)"}
-          {activeLayer === "pollen" && "Pollen count (grains/m³)"}
-          {activeLayer === "community" && "Community report types"}
+          {activeLayer === "pollen" && "Pollen risk levels"}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">

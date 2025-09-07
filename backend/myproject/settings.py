@@ -25,14 +25,20 @@ AMBEE_API_KEY = os.getenv("AMBEE_API_TOKEN")
 # Installed apps
 # -------------------------------
 INSTALLED_APPS = [
+    'django.contrib.admin',         # Django admin interface
+    'django.contrib.auth',          # Django authentication system
     'django.contrib.contenttypes',  # required by DRF
+    'django.contrib.sessions',      # Django sessions
+    'django.contrib.messages',      # Django messaging framework
     'django.contrib.staticfiles',   # for serving static files
 
     'rest_framework',               # DRF for APIs
+    'rest_framework_simplejwt',     # JWT authentication
     'corsheaders',                  # for frontend integration
 
     'authentication',               # your app
     'dashboard',                    # your app
+    'community',                    # your app
 ]
 
 # -------------------------------
@@ -40,7 +46,13 @@ INSTALLED_APPS = [
 # -------------------------------
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 # -------------------------------
@@ -60,6 +72,8 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -69,6 +83,9 @@ TEMPLATES = [
 # MongoDB connection
 # -------------------------------
 MONGO_URI = os.getenv("MONGO_URI")
+MONGODB_URI = os.getenv("MONGODB_URI", MONGO_URI)  # Fallback to MONGO_URI if MONGODB_URI not set
+MONGODB_DATABASE = os.getenv("MONGODB_DATABASE", "BreatheBetter")
+
 mongoengine.connect(
     db="BreatheBetter",
     host=MONGO_URI,
@@ -79,7 +96,12 @@ mongoengine.connect(
 # -------------------------------
 # No SQL DB (disable Django ORM)
 # -------------------------------
-DATABASES = {}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 # -------------------------------
 # Internationalization
