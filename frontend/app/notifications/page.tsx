@@ -10,19 +10,33 @@ import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, Bell, Settings, AlertTriangle, CheckCircle, Info } from "lucide-react"
 import Link from "next/link"
-
-interface Notification {
-  id: string
-  title: string
-  message: string
-  type: "alert" | "info" | "success"
-  timestamp: Date
-  read: boolean
-}
+import { 
+  getMockNotifications, 
+  markNotificationRead, 
+  markAllNotificationsRead,
+  getNotificationPreferences,
+  updateNotificationPreferences,
+  generateAirQualityAlert,
+  generateDailySummary,
+  type Notification,
+  type NotificationPreference
+} from "@/lib/notifications-api"
 
 export default function NotificationsPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
+
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [preferences, setPreferences] = useState<NotificationPreference>({
+    air_quality_alerts: true,
+    pollen_alerts: true,
+    community_reports: true,
+    daily_summary: true,
+    email_notifications: false,
+    push_notifications: true,
+  })
+  const [loadingNotifications, setLoadingNotifications] = useState(true)
+  const [loadingPreferences, setLoadingPreferences] = useState(true)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -30,59 +44,101 @@ export default function NotificationsPage() {
     }
   }, [user, loading, router])
 
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: "1",
-      title: "Air Quality Alert",
-      message:
-        "AQI has reached 105 (Unhealthy for Sensitive Groups) in your area. Consider limiting outdoor activities.",
-      type: "alert",
-      timestamp: new Date(Date.now() - 30 * 60 * 1000),
-      read: false,
-    },
-    {
-      id: "2",
-      title: "Pollen Forecast",
-      message: "High tree pollen expected tomorrow (8.5 grains/m³). Take precautions if you have allergies.",
-      type: "info",
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      read: false,
-    },
-    {
-      id: "3",
-      title: "Air Quality Improved",
-      message: "Great news! AQI has dropped to 42 (Good) in your area. Perfect time for outdoor activities.",
-      type: "success",
-      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
-      read: true,
-    },
-  ])
+  // Fetch notifications and preferences when component mounts
+  useEffect(() => {
+    if (user) {
+      fetchNotifications()
+      fetchPreferences()
+    }
+  }, [user])
 
-  const [preferences, setPreferences] = useState({
-    airQualityAlerts: true,
-    pollenAlerts: true,
-    communityReports: true,
-    dailySummary: true,
-    emailNotifications: false,
-    pushNotifications: true,
-  })
-
-  const markAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((notif) => (notif.id === id ? { ...notif, read: true } : notif)))
+  const fetchNotifications = async () => {
+    try {
+      setLoadingNotifications(true)
+      const response = await getMockNotifications()
+      if (response.success) {
+        setNotifications(response.data)
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error)
+    } finally {
+      setLoadingNotifications(false)
+    }
   }
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((notif) => ({ ...notif, read: true })))
+  const fetchPreferences = async () => {
+    try {
+      setLoadingPreferences(true)
+      const response = await getNotificationPreferences()
+      if (response.success) {
+        setPreferences(response.data)
+      }
+    } catch (error) {
+      console.error('Error fetching preferences:', error)
+    } finally {
+      setLoadingPreferences(false)
+    }
   }
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case "alert":
-        return <AlertTriangle className="h-5 w-5 text-red-500" />
-      case "success":
-        return <CheckCircle className="h-5 w-5 text-green-500" />
-      default:
-        return <Info className="h-5 w-5 text-blue-500" />
+  const markAsRead = async (id: number) => {
+    try {
+      await markNotificationRead(id)
+      setNotifications((prev) => prev.map((notif) => (notif.id === id ? { ...notif, read: true } : notif)))
+    } catch (error) {
+      console.error('Error marking notification as read:', error)
+    }
+  }
+
+  const markAllAsRead = async () => {
+    try {
+      await markAllNotificationsRead()
+      setNotifications((prev) => prev.map((notif) => ({ ...notif, read: true })))
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error)
+    }
+  }
+
+  const handlePreferenceChange = async (key: keyof NotificationPreference, value: boolean) => {
+    try {
+      const updatedPreferences = { ...preferences, [key]: value }
+      setPreferences(updatedPreferences)
+      await updateNotificationPreferences({ [key]: value })
+    } catch (error) {
+      console.error('Error updating preferences:', error)
+      // Revert on error
+      setPreferences(preferences)
+    }
+  }
+
+  const generateAlert = async () => {
+    try {
+      const response = await generateAirQualityAlert('Delhi')
+      if (response.success) {
+        setNotifications(prev => [response.notification, ...prev])
+      }
+    } catch (error) {
+      console.error('Error generating alert:', error)
+    }
+  }
+
+  const generateSummary = async () => {
+    try {
+      const response = await generateDailySummary('Delhi')
+      if (response.success) {
+        setNotifications(prev => [response.notification, ...prev])
+      }
+    } catch (error) {
+      console.error('Error generating summary:', error)
+    }
+  }
+
+  const getNotificationIcon = (type: string, priority: string) => {
+    if (priority === 'urgent' || type === 'air_quality') {
+      return <AlertTriangle className="h-5 w-5 text-red-500" />
+    } else if (type === 'pollen') {
+      return <Info className="h-5 w-5 text-yellow-500" />
+    } else {
+      return <CheckCircle className="h-5 w-5 text-green-500" />
     }
   }
 
@@ -144,45 +200,78 @@ export default function NotificationsPage() {
           <TabsContent value="notifications" className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Recent Notifications</h2>
-              {unreadCount > 0 && (
-                <Button variant="outline" size="sm" onClick={markAllAsRead}>
-                  Mark all as read
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={generateAlert}>
+                  Generate Alert
                 </Button>
-              )}
+                <Button variant="outline" size="sm" onClick={generateSummary}>
+                  Generate Summary
+                </Button>
+                {unreadCount > 0 && (
+                  <Button variant="outline" size="sm" onClick={markAllAsRead}>
+                    Mark all as read
+                  </Button>
+                )}
+              </div>
             </div>
 
-            <div className="space-y-3">
-              {notifications.map((notification) => (
-                <Card
-                  key={notification.id}
-                  className={`cursor-pointer transition-colors ${
-                    !notification.read ? "border-l-4 border-l-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20" : ""
-                  }`}
-                  onClick={() => markAsRead(notification.id)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      {getNotificationIcon(notification.type)}
-                      <div className="flex-1 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <h3 className={`font-medium ${!notification.read ? "font-semibold" : ""}`}>
-                            {notification.title}
-                          </h3>
-                          <span className="text-xs text-muted-foreground">
-                            {notification.timestamp.toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
+            {loadingNotifications ? (
+              <div className="text-center py-8">Loading notifications...</div>
+            ) : (
+              <div className="space-y-3">
+                {notifications.length === 0 ? (
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No notifications yet</h3>
+                      <p className="text-muted-foreground">You'll receive alerts about air quality and pollen here.</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  notifications.map((notification) => (
+                    <Card
+                      key={notification.id}
+                      className={`cursor-pointer transition-colors ${
+                        !notification.read ? "border-l-4 border-l-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20" : ""
+                      }`}
+                      onClick={() => markAsRead(notification.id)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          {getNotificationIcon(notification.notification_type, notification.priority)}
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <h3 className={`font-medium ${!notification.read ? "font-semibold" : ""}`}>
+                                {notification.title}
+                              </h3>
+                              <div className="flex items-center gap-2">
+                                <Badge variant={notification.priority === 'urgent' ? 'destructive' : 'secondary'}>
+                                  {notification.priority}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(notification.created_at).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </span>
+                              </div>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{notification.message}</p>
+                            {notification.data && (
+                              <div className="text-xs text-muted-foreground">
+                                {notification.data.aqi && `AQI: ${notification.data.aqi}`}
+                                {notification.data.location && ` • Location: ${notification.data.location}`}
+                              </div>
+                            )}
+                          </div>
+                          {!notification.read && <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>}
                         </div>
-                        <p className="text-sm text-muted-foreground">{notification.message}</p>
-                      </div>
-                      {!notification.read && <div className="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
@@ -192,84 +281,84 @@ export default function NotificationsPage() {
                 <CardDescription>Choose what notifications you want to receive</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <label className="text-sm font-medium">Air Quality Alerts</label>
-                      <p className="text-xs text-muted-foreground">Get notified when AQI changes significantly</p>
-                    </div>
-                    <Switch
-                      checked={preferences.airQualityAlerts}
-                      onCheckedChange={(checked) => setPreferences((prev) => ({ ...prev, airQualityAlerts: checked }))}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <label className="text-sm font-medium">Pollen Alerts</label>
-                      <p className="text-xs text-muted-foreground">Receive pollen forecasts and allergy warnings</p>
-                    </div>
-                    <Switch
-                      checked={preferences.pollenAlerts}
-                      onCheckedChange={(checked) => setPreferences((prev) => ({ ...prev, pollenAlerts: checked }))}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <label className="text-sm font-medium">Community Reports</label>
-                      <p className="text-xs text-muted-foreground">Get notified about reports in your area</p>
-                    </div>
-                    <Switch
-                      checked={preferences.communityReports}
-                      onCheckedChange={(checked) => setPreferences((prev) => ({ ...prev, communityReports: checked }))}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <label className="text-sm font-medium">Daily Summary</label>
-                      <p className="text-xs text-muted-foreground">Receive daily air quality summaries</p>
-                    </div>
-                    <Switch
-                      checked={preferences.dailySummary}
-                      onCheckedChange={(checked) => setPreferences((prev) => ({ ...prev, dailySummary: checked }))}
-                    />
-                  </div>
-                </div>
-
-                <div className="border-t pt-4">
-                  <h3 className="text-sm font-medium mb-4">Delivery Methods</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <label className="text-sm font-medium">Push Notifications</label>
-                        <p className="text-xs text-muted-foreground">Receive notifications in your browser</p>
+                {loadingPreferences ? (
+                  <div className="text-center py-8">Loading preferences...</div>
+                ) : (
+                  <>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <label className="text-sm font-medium">Air Quality Alerts</label>
+                          <p className="text-xs text-muted-foreground">Get notified when AQI changes significantly</p>
+                        </div>
+                        <Switch
+                          checked={preferences.air_quality_alerts}
+                          onCheckedChange={(checked) => handlePreferenceChange('air_quality_alerts', checked)}
+                        />
                       </div>
-                      <Switch
-                        checked={preferences.pushNotifications}
-                        onCheckedChange={(checked) =>
-                          setPreferences((prev) => ({ ...prev, pushNotifications: checked }))
-                        }
-                      />
-                    </div>
 
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <label className="text-sm font-medium">Email Notifications</label>
-                        <p className="text-xs text-muted-foreground">Receive notifications via email</p>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <label className="text-sm font-medium">Pollen Alerts</label>
+                          <p className="text-xs text-muted-foreground">Receive pollen forecasts and allergy warnings</p>
+                        </div>
+                        <Switch
+                          checked={preferences.pollen_alerts}
+                          onCheckedChange={(checked) => handlePreferenceChange('pollen_alerts', checked)}
+                        />
                       </div>
-                      <Switch
-                        checked={preferences.emailNotifications}
-                        onCheckedChange={(checked) =>
-                          setPreferences((prev) => ({ ...prev, emailNotifications: checked }))
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
 
-                <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">Save Preferences</Button>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <label className="text-sm font-medium">Community Reports</label>
+                          <p className="text-xs text-muted-foreground">Get notified about reports in your area</p>
+                        </div>
+                        <Switch
+                          checked={preferences.community_reports}
+                          onCheckedChange={(checked) => handlePreferenceChange('community_reports', checked)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <label className="text-sm font-medium">Daily Summary</label>
+                          <p className="text-xs text-muted-foreground">Receive daily air quality summaries</p>
+                        </div>
+                        <Switch
+                          checked={preferences.daily_summary}
+                          onCheckedChange={(checked) => handlePreferenceChange('daily_summary', checked)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-4">
+                      <h3 className="text-sm font-medium mb-4">Delivery Methods</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-0.5">
+                            <label className="text-sm font-medium">Push Notifications</label>
+                            <p className="text-xs text-muted-foreground">Receive notifications in your browser</p>
+                          </div>
+                          <Switch
+                            checked={preferences.push_notifications}
+                            onCheckedChange={(checked) => handlePreferenceChange('push_notifications', checked)}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-0.5">
+                            <label className="text-sm font-medium">Email Notifications</label>
+                            <p className="text-xs text-muted-foreground">Receive notifications via email</p>
+                          </div>
+                          <Switch
+                            checked={preferences.email_notifications}
+                            onCheckedChange={(checked) => handlePreferenceChange('email_notifications', checked)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

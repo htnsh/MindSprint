@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'authentication',               # your app
     'dashboard',                    # your app
     'community',                    # your app
+    'notifications',                # your app
 ]
 
 # -------------------------------
