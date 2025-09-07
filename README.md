@@ -419,5 +419,9 @@ For support and questions:
 - [ ] Multi-language support
 
 ---
+IF UNABLE TO RUN THE PROJECT, YOU CAN VIEW THE VIDEO OF OUR WORKING PROJECT 
+### BreatheBetter Recording
+Due to GitHub’s file size limit, the video is hosted on Google Drive:
+[Watch the video 📺](https://drive.google.com/file/d/134kFj9aKfr1qc1wV6xskLryN5j_SxCr0/view?usp=sharing)
 
 **Built with ❤️ for better air quality awareness**
