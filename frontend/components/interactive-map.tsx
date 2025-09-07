@@ -37,9 +37,6 @@ interface CommunityReport {
   description?: string
 }
 
-// API Configuration
-const WAQI_API_TOKEN = "fec89e5d35967b3907e0bdac5b9537ce3a8b9d2c"
-
 // Interactive Map Component
 export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
   activeLayer: string
@@ -231,7 +228,6 @@ export function InteractiveMap({ activeLayer, stations, onStationSelect }: {
       markersRef.current.push(marker)
     })
   }
-
 
   return (
     <div className="w-full h-full relative">
